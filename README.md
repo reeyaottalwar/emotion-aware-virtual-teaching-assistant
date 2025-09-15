@@ -1,6 +1,6 @@
 -----
 
-### **Emotion-Aware Virtual Teaching Assistant**
+### **Emotion-Aware Virtual Teaching Assistant using facial ER and voice ER**
 
 This project is a virtual teaching assistant that uses emotion recognition technology to provide a more personalized and supportive learning experience. By analyzing a student's emotional state through their facial expressions, the assistant can adapt its teaching style, offer timely encouragement, or suggest a break to prevent frustration.
 
@@ -74,3 +74,4 @@ python main.py
   * Lithiga Jayaprakash
   * Reeya Ottalwar 
   
+### **Thank You**
