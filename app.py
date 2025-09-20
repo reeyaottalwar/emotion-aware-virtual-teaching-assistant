@@ -1,56 +1,158 @@
-from flask import Flask, render_template
-from flask_socketio import SocketIO, emit
+from flask import Flask, jsonify, request, session, redirect, url_for
+from flask_socketio import SocketIO
+from flask_dance.contrib.google import make_google_blueprint, google
+from flask_dance.contrib.github import make_github_blueprint, github
 import os
 from dotenv import load_dotenv
+from database import db, User
+from werkzeug.security import check_password_hash
 
-# Load environment variables from a .env file
+# Set this environment variable for local testing with HTTP
+os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
+
+# Load environment variables
 load_dotenv()
 
-# Create the Flask application instance
+# Create the Flask app instance
 app = Flask(__name__)
+app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'a-default-secret-key')
 
-# Set a secret key from environment variables for security
-app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'a_default_secret_key_if_not_set')
+# Configure SQLite database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Wrap the Flask app with SocketIO to enable WebSockets
+# Initialize database with the app
+db.init_app(app)
+
+# Wrap Flask app with SocketIO
 socketio = SocketIO(app, cors_allowed_origins="*")
+
+# Function to create database tables
+def create_db():
+    with app.app_context():
+        db.create_all()
+        print("Database tables created!")
+
+# Configure Flask-Dance blueprints
+google_bp = make_google_blueprint(
+    client_id=os.environ.get("GOOGLE_OAUTH_CLIENT_ID"),
+    client_secret=os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET"),
+    scope=["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"]
+)
+
+github_bp = make_github_blueprint(
+    client_id=os.environ.get("GITHUB_OAUTH_CLIENT_ID"),
+    client_secret=os.environ.get("GITHUB_OAUTH_CLIENT_SECRET"),
+    scope=["user:email"]
+)
+
+# Register blueprints with the app
+app.register_blueprint(google_bp, url_prefix="/login")
+app.register_blueprint(github_bp, url_prefix="/login")
+
+# Unified handler for all social logins
+@app.route("/login/<provider>/authorized")
+def social_login_handler(provider):
+    if provider == 'google':
+        service = google
+    elif provider == 'github':
+        service = github
+    else:
+        return jsonify({"message": "Invalid provider"}), 400
+
+    if not service.authorized:
+        return redirect(url_for(f"{provider}.login"))
+
+    # Get user info from the provider's API
+    if provider == 'google':
+        resp = service.get("/oauth2/v2/userinfo")
+        email = resp.json()["email"]
+        name = resp.json().get("name")
+        username = email.split('@')[0]
+    elif provider == 'github':
+        resp = service.get("/user/emails")
+        email = resp.json()[0]["email"]
+        resp = service.get("/user")
+        username = resp.json()["login"]
+        name = resp.json().get("name", username)
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        user = User(name=name, username=username, email=email, password=os.urandom(16).hex())
+        db.session.add(user)
+        db.session.commit()
+    
+    session['user_id'] = user.id
+    return jsonify({"success": True, "message": f"Logged in with {provider}"})
+
+# ... Your other routes for sign-up, login, and logout go here ...
+
+@app.route('/signup', methods=['POST'])
+def signup():
+    data = request.get_json()
+    name = data.get('name')
+    username = data.get('username')
+    email = data.get('email')
+    password = data.get('password')
+    confirm_password = data.get('confirm_password')
+
+    if not all([name, username, email, password, confirm_password]):
+        return jsonify({'success': False, 'message': 'Missing fields'}), 400
+    if password != confirm_password:
+        return jsonify({'success': False, 'message': 'Passwords do not match'}), 400
+
+    existing_user_email = User.query.filter_by(email=email).first()
+    existing_user_username = User.query.filter_by(username=username).first()
+    
+    if existing_user_email or existing_user_username:
+        return jsonify({'success': False, 'message': 'Email or username already registered'}), 409
+
+    new_user = User(name=name, username=username, email=email, password=password)
+    db.session.add(new_user)
+    db.session.commit()
+
+    return jsonify({'success': True, 'message': 'User created successfully'}), 201
+
+@app.route('/login', methods=['POST'])
+def login():
+    data = request.get_json()
+    identifier = data.get('identifier')
+    password = data.get('password')
+
+    if not all([identifier, password]):
+        return jsonify({'success': False, 'message': 'Missing fields'}), 400
+
+    user = User.query.filter((User.email == identifier) | (User.username == identifier)).first()
+
+    if user and user.check_password(password):
+        session['user_id'] = user.id
+        return jsonify({'success': True, 'message': 'Login successful'})
+    else:
+        return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    return jsonify({'success': True, 'message': 'Logged out successfully'})
 
 @app.route('/')
 def index():
-    """
-    The main route for the application.
-    This will later serve the index.html file from the templates folder.
-    """
-    # For now, we'll just return a simple message to confirm the server is running.
-    return "Backend server is running. Awaiting WebSocket connections..."
+    return "Backend server is running!"
+
+@socketio.on('connect')
+def handle_connect():
+    print('Client connected')
 
 @socketio.on('video_stream')
 def handle_video_stream(data):
-    """
-    Handles incoming video data from the frontend.
-    The `data` parameter will contain the video frame (e.g., a base64 encoded string).
-    """
-    print("Received video stream data. Processing...")
-    # For Week 1, we will just echo a placeholder response.
-    # In a later week, you will call the Video Emotion Lead's module here.
-    # emotion_label = video_emotion_lead_module.detect_emotion(data)
-    # emit('video_response', {'emotion': emotion_label})
+    print("Received video stream data.")
     emit('video_response', {'emotion': 'neutral'})
 
 @socketio.on('audio_stream')
 def handle_audio_stream(data):
-    """
-    Handles incoming audio data from the frontend.
-    The `data` parameter will contain the audio chunk.
-    """
-    print("Received audio stream data. Processing...")
-    # For Week 1, we will just echo a placeholder response.
-    # In a later week, you will call the Audio Emotion Lead's module here.
-    # emotion_label = audio_emotion_lead_module.detect_emotion(data)
-    # emit('audio_response', {'emotion': emotion_label})
+    print("Received audio stream data.")
     emit('audio_response', {'emotion': 'calm'})
 
 if __name__ == '__main__':
-    # Use SocketIO's `run` method to start the server. This handles both
-    # HTTP and WebSocket connections.
+    create_db()
     socketio.run(app, debug=True)
