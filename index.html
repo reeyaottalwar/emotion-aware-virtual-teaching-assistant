@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Gateway</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
+    <script src="https://unpkg.com/feather-icons"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
+    <style>
+        .gateway-form {
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .path-card {
+            transition: all 0.5s ease;
+            transform-style: preserve-3d;
+        }
+
+        .path-card:hover {
+            transform: translateY(-10px) scale(1.05);
+        }
+
+        .interest-orb {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .interest-orb:hover {
+            transform: scale(1.2);
+            filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.7));
+        }
+
+        .selected-orb {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0px);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+
+            100% {
+                transform: translateY(0px);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 1.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .slide-up {
+            animation: slideUp 1s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-gray-900 text-white overflow-x-hidden" id="vanta-bg">
+    <!-- Stage 1: The Gateway (Login) -->
+    <div id="stage-1" class="min-h-screen flex items-center justify-center fade-in">
+        <div class="gateway-form p-10 max-w-md w-full text-center" data-aos="zoom-in">
+            <h1 class="text-4xl font-bold mb-6">Welcome Learner</h1>
+            <p class="mb-8 text-gray-300">Step through the gateway to begin your journey</p>
+
+            <div class="mb-4">
+                <input type="email" placeholder="Your Email or Username"
+                    class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+            <div class="mb-6">
+                <input type="password" placeholder="Your Password"
+                    class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500">
+            </div>
+
+            <button id="login-btn"
+                class="w-full bg-gradient-to-r from-purple-600 to-blue-500 py-3 rounded-lg font-medium hover:opacity-90 transition-all duration-300">
+                Enter the Gateway
+            </button>
+
+            <div class="mt-4 text-sm text-gray-400">
+                Don't have account?
+                <a href="#" id="show-signup" class="text-purple-400 underline">Signup</a>
+            </div>
+
+            <div class="mt-6 text-sm text-gray-400">
+                <p>Or continue with</p>
+                <div class="flex justify-center space-x-4 mt-3">
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 group">
+                        <i data-feather="github" class="w-5 h-5 group-hover:text-white"></i>
+                    </button>
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 group">
+                        <!-- Correct Hugging Face Logo -->
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" viewBox="0 0 32 32"
+                            fill="currentColor">
+                            <path
+                                d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm-4 12c0-1.105.895-2 2-2s2 .895 2 2-.895 2-2 2-2-.895-2-2zm8 0c0-1.105.895-2 2-2s2 .895 2 2-.895 2-2 2-2-.895-2-2zm-8 8c0-3.314 2.686-6 6-6s6 2.686 6 6c0 .552-.448 1-1 1H9c-.552 0-1-.448-1-1z" />
+                        </svg>
+                    </button>
+                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 group">
+                        <!-- Simple Google "G" Logo in black and white -->
+                        <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" viewBox="0 0 24 24"
+                            fill="currentColor">
+                            <path
+                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                            <path
+                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                            <path
+                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                            <path
+                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                        </svg>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- Signup Page -->
+    <div id="signup-page" class="min-h-screen hidden flex items-center justify-center fade-in">
+        <div class="gateway-form p-10 max-w-md w-full text-center" data-aos="zoom-in">
+            <h1 class="text-4xl font-bold mb-6">Sign Up</h1>
+            <p class="mb-8 text-gray-300">Please fill in this form to create an account.</p>
+
+            <form id="signup-form" onsubmit="return false;">
+                <div class="mb-4">
+                    <input type="text" id="signup-name" placeholder="Full Name"
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        required>
+                </div>
+                <div class="mb-4">
+                    <input type="text" id="signup-username" placeholder="Username"
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        required>
+                </div>
+                <div class="mb-4">
+                    <input type="email" id="signup-email" placeholder="Email (example@email.com)"
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        required>
+                </div>
+                <div class="mb-4">
+                    <input type="password" id="signup-password" placeholder="Password" minlength="8"
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        required>
+                </div>
+                <div class="mb-4">
+                    <input type="password" id="signup-repeat" placeholder="Confirm Password" minlength="8"
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        required>
+                </div>
+                <button type="button" id="signup-btn"
+                    class="w-full bg-gradient-to-r from-purple-600 to-blue-500 py-3 rounded-lg font-medium hover:opacity-90 transition-all duration-300">
+                    Create Account
+                </button>
+            </form>
+
+            <div class="mt-6 text-sm text-gray-400">
+                <a href="#" id="back-to-login" class="text-purple-400 underline">Already have account? Login</a>
+            </div>
+        </div>
+    </div>
+    <!-- Stage 2: Likes and Dislikes -->
+    <div id="stage-2" class="min-h-screen hidden flex items-center justify-center p-6">
+        <div class="gateway-form p-10 max-w-4xl w-full text-center" data-aos="zoom-in">
+            <h1 class="text-4xl font-bold mb-4">Tell Us About Yourself</h1>
+            <p class="text-xl text-gray-300 mb-12">"Help us understand your preferences to personalize your experience"
+            </p>
+
+            <div class="space-y-8">
+                <!-- Likes Section -->
+                <div class="bg-gradient-to-br from-green-900 to-gray-900 p-8 rounded-2xl">
+                    <h3 class="text-2xl font-semibold text-center text-green-400 mb-6">What do you like? 💚</h3>
+                    <p class="text-gray-300 text-center mb-6">Tell us about your interests, hobbies, or things you enjoy
+                    </p>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        <button
+                            class="like-option p-3 bg-gray-800 hover:bg-green-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'like')">Reading</button>
+                        <button
+                            class="like-option p-3 bg-gray-800 hover:bg-green-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'like')">Sports</button>
+                        <button
+                            class="like-option p-3 bg-gray-800 hover:bg-green-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'like')">Music</button>
+                        <button
+                            class="like-option p-3 bg-gray-800 hover:bg-green-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'like')">Movies</button>
+                        <button
+                            class="like-option p-3 bg-gray-800 hover:bg-green-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'like')">Cooking</button>
+                        <button
+                            class="like-option p-3 bg-gray-800 hover:bg-green-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'like')">Travel</button>
+                        <button
+                            class="like-option p-3 bg-gray-800 hover:bg-green-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'like')">Gaming</button>
+                        <button
+                            class="like-option p-3 bg-gray-800 hover:bg-green-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'like')">Art</button>
+                    </div>
+
+                    <textarea id="custom-likes" placeholder="Or write your own interests here..."
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 text-white resize-none"
+                        rows="3"></textarea>
+                </div>
+
+                <!-- Dislikes Section -->
+                <div class="bg-gradient-to-br from-red-900 to-gray-900 p-8 rounded-2xl">
+                    <h3 class="text-2xl font-semibold text-center text-red-400 mb-6">What do you dislike? 💔</h3>
+                    <p class="text-gray-300 text-center mb-6">Tell us about things you prefer to avoid</p>
+
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                        <button
+                            class="dislike-option p-3 bg-gray-800 hover:bg-red-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'dislike')">Crowds</button>
+                        <button
+                            class="dislike-option p-3 bg-gray-800 hover:bg-red-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'dislike')">Loud Noises</button>
+                        <button
+                            class="dislike-option p-3 bg-gray-800 hover:bg-red-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'dislike')">Spicy Food</button>
+                        <button
+                            class="dislike-option p-3 bg-gray-800 hover:bg-red-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'dislike')">Horror Movies</button>
+                        <button
+                            class="dislike-option p-3 bg-gray-800 hover:bg-red-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'dislike')">Early Mornings</button>
+                        <button
+                            class="dislike-option p-3 bg-gray-800 hover:bg-red-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'dislike')">Public Speaking</button>
+                        <button
+                            class="dislike-option p-3 bg-gray-800 hover:bg-red-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'dislike')">Waiting</button>
+                        <button
+                            class="dislike-option p-3 bg-gray-800 hover:bg-red-700 rounded-lg text-sm transition-all duration-300"
+                            onclick="toggleSelection(this, 'dislike')">Clutter</button>
+                    </div>
+
+                    <textarea id="custom-dislikes" placeholder="Or write your own dislikes here..."
+                        class="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white resize-none"
+                        rows="3"></textarea>
+                </div>
+
+                <!-- Continue Button -->
+                <div class="text-center">
+                    <button id="continue-preferences"
+                        class="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full font-medium text-lg hover:opacity-90 transition-all duration-300">
+                        Continue Your Journey
+                    </button>
+                    <p class="mt-3 text-sm text-gray-400">You can skip this step if you prefer</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Stage 3: The Chamber of Choices -->
+    <div id="stage-3" class="min-h-screen hidden flex-col items-center justify-center p-6">
+        <h1 class="text-4xl font-bold mb-4 text-center" data-aos="fade-down">Chamber of Choices</h1>
+        <p class="text-xl text-gray-300 mb-12 max-w-lg text-center" data-aos="fade-up">Select what calls to you</p>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 max-w-6xl" id="interest-container"
+            data-aos="zoom-in">
+            <!-- Interests will be dynamically added here -->
+        </div>
+
+        <div id="continue-btn" class="mt-12 hidden" data-aos="fade-up">
+            <button
+                class="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full font-medium text-lg hover:opacity-90 transition-all duration-300">
+                Continue Your Journey
+            </button>
+        </div>
+    </div>
+    <!-- Stage 4: The Bridge of Context -->
+    <div id="stage-4" class="min-h-screen hidden flex items-center justify-center p-6">
+        <div class="gateway-form p-10 max-w-2xl w-full text-center" data-aos="zoom-in">
+            <div class="h-32 mb-8 flex items-center justify-center">
+                <i data-feather="compass" class="w-16 h-16 text-yellow-400"></i>
+            </div>
+            <h1 class="text-4xl font-bold mb-4">Every adventurer has a story</h1>
+            <p class="text-xl text-gray-300 mb-12">"Where are you on your path?"</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-aos="fade-up">
+                <button onclick="selectContext('school')"
+                    class="p-6 bg-gray-800 hover:bg-gray-700 rounded-xl transition-all duration-300 text-left">
+                    <h3 class="text-xl font-semibold">In School</h3>
+                    <p class="mt-2 text-gray-400">Still learning the basics</p>
+                </button>
+                <button onclick="selectContext('college')"
+                    class="p-6 bg-gray-800 hover:bg-gray-700 rounded-xl transition-all duration-300 text-left">
+                    <h3 class="text-xl font-semibold">In College/University</h3>
+                    <p class="mt-2 text-gray-400">Expanding my knowledge</p>
+                </button>
+                <button onclick="selectContext('professional')"
+                    class="p-6 bg-gray-800 hover:bg-gray-700 rounded-xl transition-all duration-300 text-left">
+                    <h3 class="text-xl font-semibold">A Working Professional</h3>
+                    <p class="mt-2 text-gray-400">Applying my skills daily</p>
+                </button>
+                <button onclick="selectContext('exploring')"
+                    class="p-6 bg-gray-800 hover:bg-gray-700 rounded-xl transition-all duration-300 text-left">
+                    <h3 class="text-xl font-semibold">Just Exploring</h3>
+                    <p class="mt-2 text-gray-400">Curious about possibilities</p>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- Stage 5: Profile Summary & Confirmation -->
+    <div id="stage-5" class="min-h-screen hidden flex items-center justify-center p-6">
+        <div class="gateway-form p-10 max-w-5xl w-full text-center" data-aos="zoom-in">
+            <!-- Header -->
+            <div class="mb-8">
+                <div
+                    class="h-32 w-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center shadow-xl">
+                    <i data-feather="user-check" class="w-16 h-16 text-white"></i>
+                </div>
+                <h1 class="text-4xl font-bold mb-4">Review Your Profile</h1>
+                <p class="text-xl text-gray-300">Please confirm your details are correct before we begin</p>
+            </div>
+
+            <!-- Profile Summary Card -->
+            <div class="bg-gray-800 rounded-2xl p-8 mb-8 shadow-2xl" data-aos="fade-up">
+                <h3 class="text-2xl font-semibold mb-6 text-center">Your Complete Profile</h3>
+
+                <!-- Personal Information -->
+                <div class="mb-8 p-6 bg-gray-700 rounded-xl">
+                    <h4 class="text-lg font-medium text-yellow-400 mb-4 flex items-center">
+                        <i data-feather="user" class="w-5 h-5 mr-2"></i>
+                        Personal Information
+                    </h4>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-gray-300">
+                        <div>
+                            <span class="text-gray-400">Name:</span>
+                            <span id="summary-name" class="ml-2 font-medium">Not provided</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Username:</span>
+                            <span id="summary-username" class="ml-2 font-medium">Not provided</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Email:</span>
+                            <span id="summary-email" class="ml-2 font-medium">Not provided</span>
+                        </div>
+                        <div>
+                            <span class="text-gray-400">Context:</span>
+                            <span id="context-display" class="ml-2 font-medium">Not specified</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Preferences -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Likes -->
+                    <div class="p-6 bg-green-900 bg-opacity-30 rounded-xl border border-green-700">
+                        <h4 class="text-lg font-medium text-green-400 mb-4 flex items-center">
+                            <i data-feather="heart" class="w-5 h-5 mr-2"></i>
+                            Things You Like
+                        </h4>
+                        <ul class="space-y-2" id="passions-list">
+                            <!-- Selected likes will appear here -->
+                        </ul>
+                    </div>
+
+                    <!-- Dislikes -->
+                    <div class="p-6 bg-red-900 bg-opacity-30 rounded-xl border border-red-700">
+                        <h4 class="text-lg font-medium text-red-400 mb-4 flex items-center">
+                            <i data-feather="x-circle" class="w-5 h-5 mr-2"></i>
+                            Things You Dislike
+                        </h4>
+                        <ul class="space-y-2" id="dislikes-list">
+                            <!-- Selected dislikes will appear here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="space-y-4" data-aos="fade-up">
+                <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                    <button id="edit-profile-btn"
+                        class="px-6 py-3 bg-gray-600 hover:bg-gray-500 rounded-full font-medium text-lg transition-all duration-300">
+                        ← Edit Profile
+                    </button>
+                    <button id="confirm-profile-btn"
+                        class="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full font-medium text-lg hover:opacity-90 transition-all duration-300">
+                        Looks Good! Continue →
+                    </button>
+                </div>
+                <p class="text-sm text-gray-400">You can always update your preferences later</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quote Page -->
+    <div id="quote-page" class="min-h-screen hidden flex items-center justify-center p-6">
+        <div class="max-w-4xl w-full text-center" data-aos="fade-in">
+            <blockquote class="text-3xl md:text-5xl font-light text-white italic mb-8">
+                "Every expert was once a beginner.<br>
+                Every pro was once an amateur."
+            </blockquote>
+            <p class="text-xl text-gray-300">- Your journey starts now!</p>
+        </div>
+    </div>
+
+    <!-- Main Website Page -->
+    <div id="main-page" class="min-h-screen hidden">
+        <!-- Navigation Header -->
+        <nav
+            class="fixed top-0 left-0 right-0 z-50 bg-gray-900 bg-opacity-90 backdrop-blur-sm border-b border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <!-- Logo -->
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <h1 class="text-2xl font-bold text-white">The Gateway</h1>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Links -->
+                    <div class="hidden md:block">
+                        <div class="ml-10 flex items-baseline space-x-4">
+                            <a href="#"
+                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Dashboard</a>
+                            <a href="#"
+                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Explore</a>
+                            <a href="#"
+                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Community</a>
+                            <a href="#"
+                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Settings</a>
+                        </div>
+                    </div>
+
+                    <!-- User Profile -->
+                    <div class="flex items-center">
+                        <div class="ml-3 relative">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-gray-300 text-sm" id="user-greeting">Welcome back!</span>
+                                <div
+                                    class="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 flex items-center justify-center">
+                                    <i data-feather="user" class="w-4 h-4 text-white"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <div class="pt-16 min-h-screen bg-gray-900 text-white">
+            <!-- Hero Section -->
+            <div class="relative overflow-hidden">
+                <!-- Static Globe Background -->
+                <div id="static-globe" class="absolute inset-0 opacity-30"></div>
+
+                <!-- Loading Globe (hidden by default) -->
+                <div id="loading-globe" class="absolute inset-0 opacity-50 hidden"></div>
+
+                <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+                    <div class="text-center">
+                        <h1 class="text-4xl md:text-6xl font-bold mb-6">
+                            Welcome to Your
+                            <span class="bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
+                                Personalized Journey
+                            </span>
+                        </h1>
+                        <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                            Your adventure begins here. Explore, learn, and grow with a platform tailored just for you.
+                        </p>
+
+                        <!-- Quick Stats -->
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
+                            <div class="gateway-form p-6 text-center">
+                                <div class="text-3xl font-bold text-purple-400 mb-2">1,000+</div>
+                                <div class="text-gray-300">Active Learners</div>
+                            </div>
+                            <div class="gateway-form p-6 text-center">
+                                <div class="text-3xl font-bold text-blue-400 mb-2">50+</div>
+                                <div class="text-gray-300">Learning Paths</div>
+                            </div>
+                            <div class="gateway-form p-6 text-center">
+                                <div class="text-3xl font-bold text-green-400 mb-2">24/7</div>
+                                <div class="text-gray-300">Support Available</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Features Section -->
+            <div class="py-20 bg-gray-800 bg-opacity-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-4">Discover Your Potential</h2>
+                        <p class="text-xl text-gray-300">Tailored experiences based on your preferences and goals</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        <!-- Feature 1 -->
+                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <div
+                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 flex items-center justify-center">
+                                <i data-feather="target" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Personalized Learning</h3>
+                            <p class="text-gray-300">AI-powered recommendations based on your interests and learning
+                                style.</p>
+                        </div>
+
+                        <!-- Feature 2 -->
+                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <div
+                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-green-600 to-teal-500 flex items-center justify-center">
+                                <i data-feather="users" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Community Driven</h3>
+                            <p class="text-gray-300">Connect with like-minded learners and share your journey.</p>
+                        </div>
+
+                        <!-- Feature 3 -->
+                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <div
+                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-orange-600 to-red-500 flex items-center justify-center">
+                                <i data-feather="zap" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Real-time Progress</h3>
+                            <p class="text-gray-300">Track your growth and celebrate milestones along the way.</p>
+                        </div>
+
+                        <!-- Feature 4 -->
+                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <div
+                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-pink-600 to-purple-500 flex items-center justify-center">
+                                <i data-feather="book-open" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Rich Content</h3>
+                            <p class="text-gray-300">Access thousands of courses, tutorials, and interactive materials.
+                            </p>
+                        </div>
+
+                        <!-- Feature 5 -->
+                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <div
+                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-indigo-600 to-blue-500 flex items-center justify-center">
+                                <i data-feather="award" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Achievements</h3>
+                            <p class="text-gray-300">Earn badges and certificates as you complete your learning goals.
+                            </p>
+                        </div>
+
+                        <!-- Feature 6 -->
+                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <div
+                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-yellow-600 to-orange-500 flex items-center justify-center">
+                                <i data-feather="trending-up" class="w-8 h-8 text-white"></i>
+                            </div>
+                            <h3 class="text-xl font-semibold mb-4">Analytics</h3>
+                            <p class="text-gray-300">Detailed insights into your learning patterns and performance.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Call to Action Section -->
+            <div class="py-20">
+                <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+                    <div class="gateway-form p-12">
+                        <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Begin?</h2>
+                        <p class="text-xl text-gray-300 mb-8">
+                            Your personalized learning journey is just one click away.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                            <button
+                                class="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full font-medium text-lg hover:opacity-90 transition-all duration-300"
+                                onclick="simulateLoading()">
+                                Start Learning
+                            </button>
+                            <button
+                                class="px-8 py-3 border border-gray-600 rounded-full font-medium text-lg hover:bg-gray-800 transition-all duration-300">
+                                Explore Features
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 border-t border-gray-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+                    <div class="col-span-1 md:col-span-2">
+                        <h3 class="text-2xl font-bold text-white mb-4">The Gateway</h3>
+                        <p class="text-gray-300 mb-4">
+                            Empowering learners worldwide with personalized, AI-driven educational experiences.
+                        </p>
+                        <div class="flex space-x-4">
+                            <button class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition">
+                                <i data-feather="github" class="w-5 h-5 text-gray-300"></i>
+                            </button>
+                            <button class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition">
+                                <i data-feather="twitter" class="w-5 h-5 text-gray-300"></i>
+                            </button>
+                            <button class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition">
+                                <i data-feather="linkedin" class="w-5 h-5 text-gray-300"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4">Quick Links</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">About Us</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Courses</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Community</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Support</a></li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h4 class="text-lg font-semibold text-white mb-4">Legal</h4>
+                        <ul class="space-y-2">
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Privacy Policy</a>
+                            </li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Terms of
+                                    Service</a></li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Cookie Policy</a>
+                            </li>
+                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Contact</a></li>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
+                <p class="text-gray-400">&copy; 2025 The Gateway. All rights reserved.</p>
+            </div>
+    </div>
+    </footer>
+    </div>
+
+    <script>
+        // Initialize animations and effects
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        feather.replace();
+
+        VANTA.GLOBE({
+            el: "#vanta-bg",
+            mouseControls: true,
+            touchControls: true,
+            gyroControls: false,
+            minHeight: 200.00,
+            minWidth: 200.00,
+            scale: 1.00,
+            scaleMobile: 1.00,
+            color: 0x3f3f6f,
+            backgroundColor: 0x111827,
+            size: 0.8
+        });
+
+        const interests = [
+            "Fantasy Novels", "Coding", "Hiking", "Action Movies",
+            "Photography", "Cooking", "Music", "Travel",
+            "Gaming", "Yoga", "Art", "Science"
+        ];
+
+        // Stage 1: Login
+        document.getElementById('login-btn').addEventListener('click', function () {
+            // For login, skip directly to main page (no preferences setup)
+            document.getElementById('stage-1').classList.add('hidden');
+            document.getElementById('main-page').classList.remove('hidden');
+
+            // Set a generic greeting for login users
+            document.getElementById('user-greeting').textContent = 'Welcome back!';
+
+            // Initialize static globe
+            initializeStaticGlobe();
+        });
+
+        // Show Signup page
+        document.getElementById('show-signup').addEventListener('click', function () {
+            document.getElementById('stage-1').classList.add('hidden');
+            document.getElementById('signup-page').classList.remove('hidden');
+        });
+
+        // Back to login from signup
+        document.getElementById('back-to-login').addEventListener('click', function () {
+            document.getElementById('signup-page').classList.add('hidden');
+            document.getElementById('stage-1').classList.remove('hidden');
+        });
+
+        // Signup validation with specific email domain and direct transition
+        document.getElementById('signup-btn').addEventListener('click', function (e) {
+            e.preventDefault(); // Prevent any default form submission
+
+            var name = document.getElementById('signup-name').value.trim();
+            var username = document.getElementById('signup-username').value.trim();
+            var email = document.getElementById('signup-email').value.trim();
+            var password = document.getElementById('signup-password').value.trim();
+            var repeat = document.getElementById('signup-repeat').value.trim();
+
+            console.log('Signup button clicked'); // Debug log
+            console.log('Form values:', { name, username, email, password: password ? 'filled' : 'empty', repeat: repeat ? 'filled' : 'empty' });
+
+            // Check if all fields are filled
+            if (!name || !username || !email || !password || !repeat) {
+                alert("Please fill out all fields before proceeding.");
+                return false;
+            }
+
+            // Validate email format for standard email addresses
+            var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailPattern.test(email)) {
+                alert("Invalid email format. Please enter a valid email address (example@email.com)");
+                return false;
+            }
+
+            // Check password length
+            if (password.length < 8) {
+                alert("Password must be at least 8 characters long.");
+                return false;
+            }
+
+            // Check if passwords match
+            if (password !== repeat) {
+                alert("Passwords do not match. Please check again.");
+                return false;
+            }
+
+            console.log('All validations passed, moving to next stage'); // Debug log
+
+            // All validations passed - move to next stage
+            document.getElementById('signup-page').classList.add('hidden');
+            document.getElementById('stage-2').classList.remove('hidden');
+            document.getElementById('stage-2').classList.add('slide-up');
+
+            return false; // Prevent any further form processing
+        });
+
+        // Add Enter key support for signup form
+        document.getElementById('signup-form').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('signup-btn').click();
+            }
+        });
+
+        // Alternative: Add direct click handler that bypasses validation for testing
+        document.getElementById('signup-btn').addEventListener('dblclick', function (e) {
+            console.log('Double-click detected - bypassing validation');
+            document.getElementById('signup-page').classList.add('hidden');
+            document.getElementById('stage-2').classList.remove('hidden');
+            document.getElementById('stage-2').classList.add('slide-up');
+        });
+
+        // Stage 2: Likes and Dislikes Selection
+        function toggleSelection(button, type) {
+            button.classList.toggle('selected');
+            if (type === 'like') {
+                button.classList.toggle('bg-green-700');
+            } else {
+                button.classList.toggle('bg-red-700');
+            }
+        }
+
+        // Continue from preferences to next stage
+        document.getElementById('continue-preferences').addEventListener('click', function () {
+            // Collect selected preferences
+            const selectedLikes = [];
+            const selectedDislikes = [];
+
+            document.querySelectorAll('.like-option.selected').forEach(btn => {
+                selectedLikes.push(btn.textContent);
+            });
+
+            document.querySelectorAll('.dislike-option.selected').forEach(btn => {
+                selectedDislikes.push(btn.textContent);
+            });
+
+            // Get custom text inputs
+            const customLikes = document.getElementById('custom-likes').value.trim();
+            const customDislikes = document.getElementById('custom-dislikes').value.trim();
+
+            if (customLikes) selectedLikes.push(customLikes);
+            if (customDislikes) selectedDislikes.push(customDislikes);
+
+            // Store preferences for later use
+            window.userPreferences = {
+                likes: selectedLikes,
+                dislikes: selectedDislikes
+            };
+
+            console.log('User preferences:', window.userPreferences);
+
+            // Move to next stage
+            document.getElementById('stage-2').classList.add('hidden');
+            document.getElementById('stage-4').classList.remove('hidden'); // Skip stage 3 (Chamber of Choices)
+        });
+
+        // Stage 4: Context Selection
+        function selectContext(context) {
+            // Store context for later use
+            window.userContext = context;
+
+            document.getElementById('stage-4').classList.add('hidden');
+            document.getElementById('stage-5').classList.remove('hidden');
+
+            // Populate summary information
+            populateProfileSummary();
+        }
+
+        // Function to populate the profile summary
+        function populateProfileSummary() {
+            // Get form data from signup
+            const name = document.getElementById('signup-name').value.trim() || 'Not provided';
+            const username = document.getElementById('signup-username').value.trim() || 'Not provided';
+            const email = document.getElementById('signup-email').value.trim() || 'Not provided';
+
+            // Update personal information
+            document.getElementById('summary-name').textContent = name;
+            document.getElementById('summary-username').textContent = username;
+            document.getElementById('summary-email').textContent = email;
+
+            // Update context
+            const contextDisplay = document.getElementById('context-display');
+            switch (window.userContext) {
+                case 'school': contextDisplay.textContent = "In School - Still learning the basics"; break;
+                case 'college': contextDisplay.textContent = "In College/University - Expanding my knowledge"; break;
+                case 'professional': contextDisplay.textContent = "A Working Professional - Applying my skills daily"; break;
+                case 'exploring': contextDisplay.textContent = "Just Exploring - Curious about possibilities"; break;
+                default: contextDisplay.textContent = "Not specified"; break;
+            }
+
+            // Display likes
+            const passionsList = document.getElementById('passions-list');
+            passionsList.innerHTML = '';
+
+            if (window.userPreferences && window.userPreferences.likes.length > 0) {
+                window.userPreferences.likes.forEach(like => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center text-gray-300';
+                    li.innerHTML = `<i data-feather="heart" class="w-4 h-4 mr-2 text-green-400"></i> ${like}`;
+                    passionsList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.className = 'flex items-center text-gray-400';
+                li.innerHTML = `<i data-feather="minus" class="w-4 h-4 mr-2"></i> No preferences specified`;
+                passionsList.appendChild(li);
+            }
+
+            // Display dislikes
+            const dislikesList = document.getElementById('dislikes-list');
+            dislikesList.innerHTML = '';
+
+            if (window.userPreferences && window.userPreferences.dislikes.length > 0) {
+                window.userPreferences.dislikes.forEach(dislike => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center text-gray-300';
+                    li.innerHTML = `<i data-feather="x-circle" class="w-4 h-4 mr-2 text-red-400"></i> ${dislike}`;
+                    dislikesList.appendChild(li);
+                });
+            } else {
+                const li = document.createElement('li');
+                li.className = 'flex items-center text-gray-400';
+                li.innerHTML = `<i data-feather="minus" class="w-4 h-4 mr-2"></i> No dislikes specified`;
+                dislikesList.appendChild(li);
+            }
+
+            feather.replace();
+        }
+
+        // Edit Profile Button
+        document.getElementById('edit-profile-btn').addEventListener('click', function () {
+            // Go back to signup page for editing
+            document.getElementById('stage-5').classList.add('hidden');
+            document.getElementById('signup-page').classList.remove('hidden');
+        });
+
+        // Confirm Profile Button
+        document.getElementById('confirm-profile-btn').addEventListener('click', function () {
+            // Show quote page after profile confirmation
+            document.getElementById('stage-5').classList.add('hidden');
+            document.getElementById('quote-page').classList.remove('hidden');
+
+            // Automatically proceed to main page after 4 seconds
+            setTimeout(() => {
+                document.getElementById('quote-page').classList.add('hidden');
+                document.getElementById('main-page').classList.remove('hidden');
+
+                // Update user greeting with their name
+                const userName = document.getElementById('signup-name').value.trim() || 'Learner';
+                document.getElementById('user-greeting').textContent = `Welcome back, ${userName}!`;
+
+                // Initialize static globe
+                initializeStaticGlobe();
+            }, 4000);
+        });
+
+        // Google Login Function
+        function loginWithGoogle() {
+            // Placeholder for Google OAuth integration
+            alert('Google login would be integrated here!\n\nIn a real application, this would:\n1. Open Google OAuth popup\n2. Handle authentication\n3. Get user profile\n4. Auto-fill signup form or proceed to next stage');
+
+            // For demo purposes, simulate successful Google login
+            // You can uncomment the lines below to simulate auto-login
+            /*
+            document.getElementById('stage-1').classList.add('hidden');
+            document.getElementById('stage-2').classList.remove('hidden');
+            document.getElementById('stage-2').classList.add('slide-up');
+            */
+        }
+
+        // Initialize static globe (non-moving)
+        function initializeStaticGlobe() {
+            try {
+                VANTA.GLOBE({
+                    el: "#static-globe",
+                    mouseControls: false,
+                    touchControls: false,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x3f3f6f,
+                    backgroundColor: 0x111827,
+                    size: 0.8,
+                    speed: 0 // Static - no movement
+                });
+            } catch (error) {
+                console.log('Static globe initialization skipped');
+            }
+        }
+
+        // Initialize loading globe (moving)
+        function initializeLoadingGlobe() {
+            try {
+                VANTA.GLOBE({
+                    el: "#loading-globe",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x3f3f6f,
+                    backgroundColor: 0x111827,
+                    size: 0.8,
+                    speed: 1.5 // Moving for loading state
+                });
+            } catch (error) {
+                console.log('Loading globe initialization skipped');
+            }
+        }
+
+        // Simulate loading with moving globe
+        function simulateLoading() {
+            // Hide static globe, show loading globe
+            document.getElementById('static-globe').classList.add('hidden');
+            document.getElementById('loading-globe').classList.remove('hidden');
+
+            // Initialize moving globe
+            initializeLoadingGlobe();
+
+            // Simulate loading for 3 seconds
+            setTimeout(() => {
+                // Hide loading globe, show static globe
+                document.getElementById('loading-globe').classList.add('hidden');
+                document.getElementById('static-globe').classList.remove('hidden');
+
+                // Reinitialize static globe
+                initializeStaticGlobe();
+
+                alert('Loading complete! This is where your learning content would appear.');
+            }, 3000);
+        }
+    </script>
+</body>
+
+</html>
