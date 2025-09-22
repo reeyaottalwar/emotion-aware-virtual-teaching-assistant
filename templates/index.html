@@ -119,33 +119,22 @@
             <div class="mt-6 text-sm text-gray-400">
                 <p>Or continue with</p>
                 <div class="flex justify-center space-x-4 mt-3">
-                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 group">
-                        <i data-feather="github" class="w-5 h-5 group-hover:text-white"></i>
-                    </button>
-                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 group">
-                        <!-- Correct Hugging Face Logo -->
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" viewBox="0 0 32 32"
-                            fill="currentColor">
-                            <path
-                                d="M16 2C8.268 2 2 8.268 2 16s6.268 14 14 14 14-6.268 14-14S23.732 2 16 2zm-4 12c0-1.105.895-2 2-2s2 .895 2 2-.895 2-2 2-2-.895-2-2zm8 0c0-1.105.895-2 2-2s2 .895 2 2-.895 2-2 2-2-.895-2-2zm-8 8c0-3.314 2.686-6 6-6s6 2.686 6 6c0 .552-.448 1-1 1H9c-.552 0-1-.448-1-1z" />
-                        </svg>
-                    </button>
-                    <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 group">
-                        <!-- Simple Google "G" Logo in black and white -->
-                        <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" viewBox="0 0 24 24"
-                            fill="currentColor">
-                            <path
-                                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
-                            <path
-                                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
-                            <path
-                                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
-                            <path
-                                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
-                        </svg>
-                    </button>
+                    <a href="/login/github">
+                        <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 group">
+                            <i data-feather="github" class="w-5 h-5 group-hover:text-white"></i>
+                        </button>
+                    </a>
+                    <a href="/login/google">
+                        <button class="p-3 rounded-full bg-gray-800 hover:bg-gray-700 transition-all duration-300 group">
+                            <svg class="w-5 h-5 text-gray-400 group-hover:text-white transition-colors" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                            </svg>
+                        </button>
+                    </a>
                 </div>
-
             </div>
         </div>
     </div>
@@ -277,11 +266,17 @@
 
                 <!-- Continue Button -->
                 <div class="text-center">
-                    <button id="continue-preferences"
-                        class="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full font-medium text-lg hover:opacity-90 transition-all duration-300">
-                        Continue Your Journey
-                    </button>
-                    <p class="mt-3 text-sm text-gray-400">You can skip this step if you prefer</p>
+                    <div class="space-y-4 text-center">
+                        <button id="continue-preferences"
+                            class="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full font-medium text-lg hover:opacity-90 transition-all duration-300">
+                            Continue Your Journey
+                        </button>
+                        <p class="mt-3 text-sm text-gray-400">
+                            <span id="skip-preferences" class="cursor-pointer underline hover:text-white transition-colors">
+                                You can skip this step if you prefer
+                            </span>
+                        </p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -702,15 +697,42 @@
 
         // Stage 1: Login
         document.getElementById('login-btn').addEventListener('click', function () {
-            // For login, skip directly to main page (no preferences setup)
-            document.getElementById('stage-1').classList.add('hidden');
-            document.getElementById('main-page').classList.remove('hidden');
+            const identifier = document.querySelector('input[type="email"]').value; // This needs to be a unified input for email or username
+            const password = document.querySelector('input[type="password"]').value;
 
-            // Set a generic greeting for login users
-            document.getElementById('user-greeting').textContent = 'Welcome back!';
+            fetch('/login', {
+                method: 'POST',
+                headers: {
+                'Content-Type': 'application/json',
+               },
+                body: JSON.stringify({ identifier, password }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                // If the response is not OK (e.g., 401), throw an error
+                    return response.json().then(err => { throw new Error(err.message); });
+                 }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    console.log('Login successful:', data);
+                    
+                    // Navigate to the main page on success, as per your desired flow
+                    document.getElementById('stage-1').classList.add('hidden');
+                    document.getElementById('main-page').classList.remove('hidden');
 
-            // Initialize static globe
-            initializeStaticGlobe();
+                    // Set the user greeting based on the login identifier
+                    const userName = identifier.split('@')[0] || 'Learner';
+                    document.getElementById('user-greeting').textContent = `Welcome back, ${userName}!`;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+             console.error('Login failed:', error);
+                alert(error.message);
+            });
         });
 
         // Show Signup page
@@ -727,52 +749,71 @@
 
         // Signup validation with specific email domain and direct transition
         document.getElementById('signup-btn').addEventListener('click', function (e) {
-            e.preventDefault(); // Prevent any default form submission
+            e.preventDefault();
 
-            var name = document.getElementById('signup-name').value.trim();
-            var username = document.getElementById('signup-username').value.trim();
-            var email = document.getElementById('signup-email').value.trim();
-            var password = document.getElementById('signup-password').value.trim();
-            var repeat = document.getElementById('signup-repeat').value.trim();
+            const name = document.getElementById('signup-name').value.trim();
+            const username = document.getElementById('signup-username').value.trim();
+            const email = document.getElementById('signup-email').value.trim();
+            const password = document.getElementById('signup-password').value.trim();
+            const repeat = document.getElementById('signup-repeat').value.trim();
 
-            console.log('Signup button clicked'); // Debug log
-            console.log('Form values:', { name, username, email, password: password ? 'filled' : 'empty', repeat: repeat ? 'filled' : 'empty' });
-
-            // Check if all fields are filled
+            // 1. Client-Side Validation
             if (!name || !username || !email || !password || !repeat) {
                 alert("Please fill out all fields before proceeding.");
-                return false;
+                return;
             }
 
-            // Validate email format for standard email addresses
-            var emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailPattern.test(email)) {
                 alert("Invalid email format. Please enter a valid email address (example@email.com)");
-                return false;
+                return;
             }
 
-            // Check password length
             if (password.length < 8) {
                 alert("Password must be at least 8 characters long.");
-                return false;
+                return;
             }
 
-            // Check if passwords match
             if (password !== repeat) {
                 alert("Passwords do not match. Please check again.");
-                return false;
+                return;
             }
 
-            console.log('All validations passed, moving to next stage'); // Debug log
-
-            // All validations passed - move to next stage
-            document.getElementById('signup-page').classList.add('hidden');
-            document.getElementById('stage-2').classList.remove('hidden');
-            document.getElementById('stage-2').classList.add('slide-up');
-
-            return false; // Prevent any further form processing
+            // 2. Server-Side Request (API Call)
+            fetch('/signup', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: name,
+                    username: username,
+                    email: email,
+                    password: password,
+                    confirm_password: repeat
+                }),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Handle HTTP errors (e.g., 400, 409)
+                    return response.json().then(err => { throw new Error(err.message); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Signup successful:', data);
+                // 3. UI Update on Success
+                document.getElementById('signup-page').classList.add('hidden');
+                document.getElementById('stage-2').classList.remove('hidden');
+                document.getElementById('stage-2').classList.add('slide-up');
+                // You may want to also reset the form here
+                // e.target.reset(); 
+            })
+            .catch(error => {
+                console.error('Signup failed:', error);
+                alert(error.message); // Display error message from the backend
+            });
         });
-
         // Add Enter key support for signup form
         document.getElementById('signup-form').addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
@@ -799,9 +840,16 @@
             }
         }
 
-        // Continue from preferences to next stage
+        // New JavaScript to handle the "skip" action
+        document.getElementById('skip-preferences').addEventListener('click', function() {
+            console.log('User chose to skip preferences.');
+            // Move directly to the next stage without saving any data
+            document.getElementById('stage-2').classList.add('hidden');
+            document.getElementById('stage-4').classList.remove('hidden');
+        });
+
+        // Refactored JavaScript for the "Continue Your Journey" button
         document.getElementById('continue-preferences').addEventListener('click', function () {
-            // Collect selected preferences
             const selectedLikes = [];
             const selectedDislikes = [];
 
@@ -813,38 +861,99 @@
                 selectedDislikes.push(btn.textContent);
             });
 
-            // Get custom text inputs
             const customLikes = document.getElementById('custom-likes').value.trim();
             const customDislikes = document.getElementById('custom-dislikes').value.trim();
 
             if (customLikes) selectedLikes.push(customLikes);
             if (customDislikes) selectedDislikes.push(customDislikes);
 
-            // Store preferences for later use
-            window.userPreferences = {
+            // Prepare data to be sent
+            const preferencesData = {
                 likes: selectedLikes,
                 dislikes: selectedDislikes
             };
 
-            console.log('User preferences:', window.userPreferences);
-
-            // Move to next stage
-            document.getElementById('stage-2').classList.add('hidden');
-            document.getElementById('stage-4').classList.remove('hidden'); // Skip stage 3 (Chamber of Choices)
+            // Make API call to store data
+            fetch('/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(preferencesData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Preferences updated successfully:', data);
+                // Save preferences to the window object for later use
+                window.userPreferences = preferencesData; 
+                if (data.success) {
+                    // Move to Stage 4
+                    document.getElementById('stage-2').classList.add('hidden');
+                    document.getElementById('stage-4').classList.remove('hidden');
+                } else {
+                    alert('Failed to save preferences: ' + data.message);
+                }
+            //             // Move to the next stage after a successful API call
+            //     document.getElementById('stage-2').classList.add('hidden');
+            //     document.getElementById('stage-4').classList.remove('hidden');
+            // 
+            })
+            .catch(error => {
+                console.error('Failed to save preferences:', error);
+                alert('Failed to save preferences. Please try again.');
+            });
         });
-
         // Stage 4: Context Selection
         function selectContext(context) {
-            // Store context for later use
+            // Store context for later use (this is a good practice)
             window.userContext = context;
 
-            document.getElementById('stage-4').classList.add('hidden');
-            document.getElementById('stage-5').classList.remove('hidden');
+            // Retrieve the user preferences that were saved from the previous step
+            const userPreferences = window.userPreferences || { likes: [], dislikes: [] };
 
-            // Populate summary information
-            populateProfileSummary();
+            // Combine all profile data into a single object
+            const profileData = {
+                likes: userPreferences.likes,
+                dislikes: userPreferences.dislikes,
+                context: window.userContext
+            };
+
+            // Make the API call to store the complete profile data
+            fetch('/api/profile', {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(profileData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Profile context updated:', data);
+                if (data.success) {
+                    // Move to Stage 5
+                    document.getElementById('stage-4').classList.add('hidden');
+                    document.getElementById('stage-5').classList.remove('hidden');
+                    // Populate summary information after the data is successfully sent
+                    populateProfileSummary();
+                } else {
+                    alert('Failed to save profile context: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Failed to save context:', error);
+                alert('Failed to save your profile context. Please try again.');
+            });
         }
-
         // Function to populate the profile summary
         function populateProfileSummary() {
             // Get form data from signup
@@ -932,20 +1041,31 @@
                 initializeStaticGlobe();
             }, 4000);
         });
+        // Add this function to check the login status
+        function checkLoginStatus() {
+            // This is a simplified check. A real app would verify a session token.
+            // For our purpose, we can check if the user is in a session.
+            fetch('http://127.0.0.1:5000/check_session')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_authenticated) {
+                        // User is logged in, show the main page
+                        document.getElementById('stage-1').classList.add('hidden');
+                        document.getElementById('main-page').classList.remove('hidden');
 
-        // Google Login Function
-        function loginWithGoogle() {
-            // Placeholder for Google OAuth integration
-            alert('Google login would be integrated here!\n\nIn a real application, this would:\n1. Open Google OAuth popup\n2. Handle authentication\n3. Get user profile\n4. Auto-fill signup form or proceed to next stage');
+                        // Update greeting
+                        const userName = data.username || 'Learner';
+                        document.getElementById('user-greeting').textContent = `Welcome back, ${userName}!`;
 
-            // For demo purposes, simulate successful Google login
-            // You can uncomment the lines below to simulate auto-login
-            /*
-            document.getElementById('stage-1').classList.add('hidden');
-            document.getElementById('stage-2').classList.remove('hidden');
-            document.getElementById('stage-2').classList.add('slide-up');
-            */
+                        // Initialize the static globe on the main page
+                        initializeStaticGlobe();
+                    }
+                })
+                .catch(error => {
+                    console.log("Not logged in. Showing login page.");
+                });
         }
+
 
         // Initialize static globe (non-moving)
         function initializeStaticGlobe() {
@@ -1012,6 +1132,56 @@
                 alert('Loading complete! This is where your learning content would appear.');
             }, 3000);
         }
+
+        function initializePage() {
+            AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+            feather.replace();
+
+            VANTA.GLOBE({
+                el: "#vanta-bg",
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                minHeight: 200.00,
+                minWidth: 200.00,
+                scale: 1.00,
+                scaleMobile: 1.00,
+                color: 0x3f3f6f,
+                backgroundColor: 0x111827,
+                size: 0.8
+            });
+
+            // Check login status on every page load
+            checkLoginStatus();
+        }
+
+        function checkLoginStatus() {
+            fetch('http://127.0.0.1:5000/check_session')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_authenticated) {
+                        // User is authenticated, so show the main page.
+                        document.getElementById('stage-1').classList.add('hidden');
+                        document.getElementById('main-page').classList.remove('hidden');
+
+                        const userName = data.username || 'Learner';
+                        document.getElementById('user-greeting').textContent = `Welcome back, ${userName}!`;
+
+                        initializeStaticGlobe();
+                    } else {
+                        // Not authenticated, stay on the login page.
+                        document.getElementById('stage-1').classList.remove('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking session:', error);
+                    // Default to showing the login page on error.
+                    document.getElementById('stage-1').classList.remove('hidden');
+                });
+        }
+
+        // Ensure this runs when the document is ready
+        window.onload = initializePage;
     </script>
 </body>
 

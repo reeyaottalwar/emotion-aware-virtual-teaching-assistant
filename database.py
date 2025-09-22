@@ -10,11 +10,16 @@ class User(db.Model):
     name = db.Column(db.String(120), nullable=False)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=True)  # Now nullable for social logins
+    password_hash = db.Column(db.String(255), nullable=True) 
     
     # New fields for social login
     social_id = db.Column(db.String(255), unique=True, nullable=True)
     
+    # Add new columns for user preferences and context
+    likes = db.Column(db.Text, nullable=True)
+    dislikes = db.Column(db.Text, nullable=True)
+    context = db.Column(db.String(50), nullable=True)
+
     def __init__(self, name, username, email, password=None, social_id=None):
         self.name = name
         self.username = username
