@@ -298,7 +298,7 @@
             </button>
         </div>
     </div>
-    <!-- Stage 4: The Bridge of Context -->
+    <!-- Stage 4: The Bridge of Context -- Profession-->
     <div id="stage-4" class="min-h-screen hidden flex items-center justify-center p-6">
         <div class="gateway-form p-10 max-w-2xl w-full text-center" data-aos="zoom-in">
             <div class="h-32 mb-8 flex items-center justify-center">
@@ -673,22 +673,90 @@
             once: true
         });
 
-        feather.replace();
+        // Initialize static globe (non-moving)
+        function initializeStaticGlobe() {
+            try {
+                VANTA.GLOBE({
+                    el: "#static-globe",
+                    mouseControls: false,
+                    touchControls: false,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x3f3f6f,
+                    backgroundColor: 0x111827,
+                    size: 0.8,
+                    speed: 0 // Static - no movement
+                });
+            } catch (error) {
+                console.log('Static globe initialization skipped');
+            }
+        }
 
-        VANTA.GLOBE({
-            el: "#vanta-bg",
-            mouseControls: true,
-            touchControls: true,
-            gyroControls: false,
-            minHeight: 200.00,
-            minWidth: 200.00,
-            scale: 1.00,
-            scaleMobile: 1.00,
-            color: 0x3f3f6f,
-            backgroundColor: 0x111827,
-            size: 0.8
-        });
+        // Initialize loading globe (moving)
+        function initializeLoadingGlobe() {
+            try {
+                VANTA.GLOBE({
+                    el: "#loading-globe",
+                    mouseControls: true,
+                    touchControls: true,
+                    gyroControls: false,
+                    minHeight: 200.00,
+                    minWidth: 200.00,
+                    scale: 1.00,
+                    scaleMobile: 1.00,
+                    color: 0x3f3f6f,
+                    backgroundColor: 0x111827,
+                    size: 0.8,
+                    speed: 1.5 // Moving for loading state
+                });
+            } catch (error) {
+                console.log('Loading globe initialization skipped');
+            }
+        }
+        
+        window.onload = function(){
+            VANTA.GLOBE({
+                el: "#vanta-bg",
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                minHeight: 200.00,
+                minWidth: 200.00,
+                scale: 1.00,
+                scaleMobile: 1.00,
+                color: 0x3f3f6f,
+                backgroundColor: 0x111827,
+                size: 0.8
+            });
+            feather.replace();
 
+            fetch('http://127.0.0.1:5000/check_session')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_authenticated) {
+                        // User is authenticated, show main page
+                        document.getElementById('stage-1').classList.add('hidden');
+                        document.getElementById('main-page').classList.remove('hidden');
+                        
+                        // Update greeting with username from backend
+                        document.getElementById('user-greeting').textContent = `Welcome back, ${data.username}!`;
+                        
+                        // Initialize static globe for the main page
+                        initializeStaticGlobe();
+                    } else {
+                        // Not authenticated, show the login page
+                        document.getElementById('stage-1').classList.remove('hidden');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error checking session:', error);
+                    document.getElementById('stage-1').classList.remove('hidden');
+                });
+        };            
+            
         const interests = [
             "Fantasy Novels", "Coding", "Hiking", "Action Movies",
             "Photography", "Cooking", "Music", "Travel",
@@ -700,7 +768,7 @@
             const identifier = document.querySelector('input[type="email"]').value; // This needs to be a unified input for email or username
             const password = document.querySelector('input[type="password"]').value;
 
-            fetch('/login', {
+            fetch('http://127.0.0.1:5000/login', {
                 method: 'POST',
                 headers: {
                 'Content-Type': 'application/json',
@@ -717,14 +785,8 @@
             .then(data => {
                 if (data.success) {
                     console.log('Login successful:', data);
-                    
-                    // Navigate to the main page on success, as per your desired flow
-                    document.getElementById('stage-1').classList.add('hidden');
-                    document.getElementById('main-page').classList.remove('hidden');
-
-                    // Set the user greeting based on the login identifier
-                    const userName = identifier.split('@')[0] || 'Learner';
-                    document.getElementById('user-greeting').textContent = `Welcome back, ${userName}!`;
+                    // Reload page to trigger the checkloginStatus on window.onload
+                    window.location.reload();                    
                 } else {
                     alert(data.message);
                 }
@@ -780,7 +842,7 @@
             }
 
             // 2. Server-Side Request (API Call)
-            fetch('/signup', {
+            fetch('http://127.0.0.1:5000/signup', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -802,12 +864,14 @@
             })
             .then(data => {
                 console.log('Signup successful:', data);
-                // 3. UI Update on Success
-                document.getElementById('signup-page').classList.add('hidden');
-                document.getElementById('stage-2').classList.remove('hidden');
-                document.getElementById('stage-2').classList.add('slide-up');
-                // You may want to also reset the form here
-                // e.target.reset(); 
+                if (data.success){
+                    document.getElementById('signup-page').classList.add('hidden');
+                    document.getElementById('stage-2').classList.remove('hidden');
+                    document.getElementById('stage-2').classList.add('slide-up');
+                }
+                else{
+                    alert(data.message);
+                }
             })
             .catch(error => {
                 console.error('Signup failed:', error);
@@ -840,7 +904,7 @@
             }
         }
 
-        // New JavaScript to handle the "skip" action
+        // to handle the "skip" action
         document.getElementById('skip-preferences').addEventListener('click', function() {
             console.log('User chose to skip preferences.');
             // Move directly to the next stage without saving any data
@@ -848,7 +912,7 @@
             document.getElementById('stage-4').classList.remove('hidden');
         });
 
-        // Refactored JavaScript for the "Continue Your Journey" button
+        // for the "Continue Your Journey" button
         document.getElementById('continue-preferences').addEventListener('click', function () {
             const selectedLikes = [];
             const selectedDislikes = [];
@@ -874,7 +938,7 @@
             };
 
             // Make API call to store data
-            fetch('/api/profile', {
+            fetch('http://127.0.0.1:5000/api/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -898,10 +962,6 @@
                 } else {
                     alert('Failed to save preferences: ' + data.message);
                 }
-            //             // Move to the next stage after a successful API call
-            //     document.getElementById('stage-2').classList.add('hidden');
-            //     document.getElementById('stage-4').classList.remove('hidden');
-            // 
             })
             .catch(error => {
                 console.error('Failed to save preferences:', error);
@@ -924,7 +984,7 @@
             };
 
             // Make the API call to store the complete profile data
-            fetch('/api/profile', {
+            fetch('http://127.0.0.1:5000/api/profile', {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -1041,10 +1101,9 @@
                 initializeStaticGlobe();
             }, 4000);
         });
-        // Add this function to check the login status
+
+        // to check the login status
         function checkLoginStatus() {
-            // This is a simplified check. A real app would verify a session token.
-            // For our purpose, we can check if the user is in a session.
             fetch('http://127.0.0.1:5000/check_session')
                 .then(response => response.json())
                 .then(data => {
@@ -1066,50 +1125,6 @@
                 });
         }
 
-
-        // Initialize static globe (non-moving)
-        function initializeStaticGlobe() {
-            try {
-                VANTA.GLOBE({
-                    el: "#static-globe",
-                    mouseControls: false,
-                    touchControls: false,
-                    gyroControls: false,
-                    minHeight: 200.00,
-                    minWidth: 200.00,
-                    scale: 1.00,
-                    scaleMobile: 1.00,
-                    color: 0x3f3f6f,
-                    backgroundColor: 0x111827,
-                    size: 0.8,
-                    speed: 0 // Static - no movement
-                });
-            } catch (error) {
-                console.log('Static globe initialization skipped');
-            }
-        }
-
-        // Initialize loading globe (moving)
-        function initializeLoadingGlobe() {
-            try {
-                VANTA.GLOBE({
-                    el: "#loading-globe",
-                    mouseControls: true,
-                    touchControls: true,
-                    gyroControls: false,
-                    minHeight: 200.00,
-                    minWidth: 200.00,
-                    scale: 1.00,
-                    scaleMobile: 1.00,
-                    color: 0x3f3f6f,
-                    backgroundColor: 0x111827,
-                    size: 0.8,
-                    speed: 1.5 // Moving for loading state
-                });
-            } catch (error) {
-                console.log('Loading globe initialization skipped');
-            }
-        }
 
         // Simulate loading with moving globe
         function simulateLoading() {
@@ -1155,34 +1170,8 @@
             checkLoginStatus();
         }
 
-        function checkLoginStatus() {
-            fetch('http://127.0.0.1:5000/check_session')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.is_authenticated) {
-                        // User is authenticated, so show the main page.
-                        document.getElementById('stage-1').classList.add('hidden');
-                        document.getElementById('main-page').classList.remove('hidden');
-
-                        const userName = data.username || 'Learner';
-                        document.getElementById('user-greeting').textContent = `Welcome back, ${userName}!`;
-
-                        initializeStaticGlobe();
-                    } else {
-                        // Not authenticated, stay on the login page.
-                        document.getElementById('stage-1').classList.remove('hidden');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking session:', error);
-                    // Default to showing the login page on error.
-                    document.getElementById('stage-1').classList.remove('hidden');
-                });
-        }
-
-        // Ensure this runs when the document is ready
         window.onload = initializePage;
+
     </script>
 </body>
-
 </html>

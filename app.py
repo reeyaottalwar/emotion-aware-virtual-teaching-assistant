@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, session, redirect, url_for, render_template # Add render_template
+from flask import Flask, jsonify, request, session, redirect, url_for, render_template 
 from flask_socketio import SocketIO
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
@@ -21,7 +21,7 @@ app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'a-default-secret-
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-# Initialize database with the app
+# Initialize database with the app.py
 db.init_app(app)
 
 # Wrap Flask app with SocketIO - CORS enabled
@@ -68,7 +68,7 @@ def social_login_handler(provider):
     if not service.authorized:
         return redirect(url_for(f"{provider}.login"))
 
-    # Get user info from the provider's API
+    # user info from the provider's API
     if provider == 'google':
         resp = service.get("/oauth2/v2/userinfo")
         email = resp.json()["email"]
@@ -81,14 +81,17 @@ def social_login_handler(provider):
         username = resp.json()["login"]
         name = resp.json().get("name", username)
 
+    # Check for an existing user
     user = User.query.filter_by(email=email).first()
+
+    # create a new user if one does not exist
     if not user:
         user = User(name=name, username=username, email=email, password=os.urandom(16).hex())
         db.session.add(user)
         db.session.commit()
     
     session['user_id'] = user.id
-    return redirect(url_for('index'))
+    return render_template('redirect.html')
 
 # Checking if log-in was successful
 @app.route('/check_session')
@@ -104,7 +107,7 @@ def check_session():
     
     return jsonify({'is_authenticated': False}), 200
 
-# ... Your other routes for sign-up, login, and logout go here ...
+# Sign-up rendering
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
@@ -134,7 +137,7 @@ def signup():
 
     return jsonify({'success': True, 'message': 'User created successfully'}), 201
 
-# In your app.py, add a new route for profile updates
+# for profile updates
 @app.route('/api/profile', methods=['PUT'])
 def update_profile():
     user_id = session.get('user_id')
@@ -150,8 +153,6 @@ def update_profile():
     if not user:
         return jsonify({'success': False, 'message': 'User not found'}), 404
 
-    # Update the user's record in the database
-    # You'll need to add columns for likes, dislikes, and context to your User model
     user.likes = ','.join(likes) if likes else ''
     user.dislikes = ','.join(dislikes) if dislikes else ''
     user.context = context
@@ -159,6 +160,7 @@ def update_profile():
 
     return jsonify({'success': True, 'message': 'Profile updated successfully'}), 200
 
+# Login 
 @app.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
@@ -176,30 +178,30 @@ def login():
     else:
         return jsonify({'success': False, 'message': 'Invalid credentials'}), 401
 
-
+# log-out
 @app.route('/logout')
 def logout():
     session.pop('user_id', None)
     return jsonify({'success': True, 'message': 'Logged out successfully'})
 
-# @app.route('/')
-# def index():
-#     return "Backend server is running!"
 
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
+# @socketio.on('connect')
+# def handle_connect():
+#     print('Client connected')
 
+# For Video-based emotion-detection module 
 @socketio.on('video_stream')
 def handle_video_stream(data):
     print("Received video stream data.")
     emit('video_response', {'emotion': 'neutral'})
 
+# For Voice-based emotion-detection module
 @socketio.on('audio_stream')
 def handle_audio_stream(data):
     print("Received audio stream data.")
     emit('audio_response', {'emotion': 'calm'})
 
+# Main 
 if __name__ == '__main__':
     create_db()
     socketio.run(app, debug=True)
