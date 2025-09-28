@@ -3,6 +3,7 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import Navigation from "@/components/navigation"
 import ClientScripts from "@/components/client-scripts"
+import FloatingChat from "@/components/floating-chat"
 
 const inter = Inter({ subsets: ["latin"] })
 
@@ -26,6 +27,8 @@ export default function RootLayout({
         <Navigation />
 
         <main className="pt-20 pb-8 relative z-10">{children}</main>
+
+        <FloatingChat />
 
         <ClientScripts />
 
