@@ -429,238 +429,110 @@
     </div>
 
     <!-- Main Website Page -->
-    <div id="main-page" class="min-h-screen hidden">
-        <!-- Navigation Header -->
-        <nav
-            class="fixed top-0 left-0 right-0 z-50 bg-gray-900 bg-opacity-90 backdrop-blur-sm border-b border-gray-700">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div class="flex justify-between items-center h-16">
-                    <!-- Logo -->
-                    <div class="flex items-center">
-                        <div class="flex-shrink-0">
-                            <h1 class="text-2xl font-bold text-white">The Gateway</h1>
-                        </div>
-                    </div>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
-                    <!-- Navigation Links -->
-                    <div class="hidden md:block">
-                        <div class="ml-10 flex items-baseline space-x-4">
-                            <a href="#"
-                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Dashboard</a>
-                            <a href="#"
-                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Explore</a>
-                            <a href="#"
-                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Community</a>
-                            <a href="#"
-                                class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors">Settings</a>
-                        </div>
-                    </div>
-
-                    <!-- User Profile -->
-                    <div class="flex items-center">
-                        <div class="ml-3 relative">
-                            <div class="flex items-center space-x-3">
-                                <span class="text-gray-300 text-sm" id="user-greeting">Welcome back!</span>
-                                <div
-                                    class="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 flex items-center justify-center">
-                                    <i data-feather="user" class="w-4 h-4 text-white"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <div id="main-page" class="flex h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 hidden">
+        
+        <aside id="sidebar" class="w-64 flex-shrink-0 bg-gray-800 dark:bg-gray-900 text-white flex flex-col border-r border-gray-700 transition-transform duration-300 transform -translate-x-full md:translate-x-0">
+            <div class="p-4 border-b border-gray-700 flex items-center justify-between">
+                <h2 class="text-xl font-bold">VTA Sessions</h2>
+                <button id="sidebar-close-btn" class="text-white md:hidden p-1 rounded hover:bg-gray-700">
+                    <i data-feather="x" class="w-6 h-6"></i>
+                </button>
             </div>
-        </nav>
-
-        <!-- Main Content -->
-        <div class="pt-16 min-h-screen bg-gray-900 text-white">
-            <!-- Hero Section -->
-            <div class="relative overflow-hidden">
-                <!-- Static Globe Background -->
-                <div id="static-globe" class="absolute inset-0 opacity-30"></div>
-
-                <!-- Loading Globe (hidden by default) -->
-                <div id="loading-globe" class="absolute inset-0 opacity-50 hidden"></div>
-
-                <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
-                    <div class="text-center">
-                        <h1 class="text-4xl md:text-6xl font-bold mb-6">
-                            Welcome to Your
-                            <span class="bg-gradient-to-r from-purple-400 to-blue-500 bg-clip-text text-transparent">
-                                Personalized Journey
-                            </span>
-                        </h1>
-                        <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-                            Your adventure begins here. Explore, learn, and grow with a platform tailored just for you.
-                        </p>
-
-                        <!-- Quick Stats -->
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-                            <div class="gateway-form p-6 text-center">
-                                <div class="text-3xl font-bold text-purple-400 mb-2">1,000+</div>
-                                <div class="text-gray-300">Active Learners</div>
-                            </div>
-                            <div class="gateway-form p-6 text-center">
-                                <div class="text-3xl font-bold text-blue-400 mb-2">50+</div>
-                                <div class="text-gray-300">Learning Paths</div>
-                            </div>
-                            <div class="gateway-form p-6 text-center">
-                                <div class="text-3xl font-bold text-green-400 mb-2">24/7</div>
-                                <div class="text-gray-300">Support Available</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            
+            <div class="p-4">
+                <button id="new-session-btn"
+                    class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center transition-colors">
+                    <i data-feather="plus" class="w-5 h-5 mr-2"></i> New Study Session
+                </button>
             </div>
 
-            <!-- Features Section -->
-            <div class="py-20 bg-gray-800 bg-opacity-50">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="text-center mb-16">
-                        <h2 class="text-3xl md:text-4xl font-bold mb-4">Discover Your Potential</h2>
-                        <p class="text-xl text-gray-300">Tailored experiences based on your preferences and goals</p>
+            <nav class="flex-grow overflow-y-auto p-2 space-y-1">
+                <div id="session-list" class="space-y-1">
+                    <div class="p-3 bg-gray-700 rounded-lg cursor-pointer">
+                        <p class="text-sm font-medium truncate">Welcome Session (Active)</p>
+                        <span class="text-xs text-gray-400">Oct 8, 2025</span>
                     </div>
+                </div>
+                <p id="no-sessions" class="text-center text-sm text-gray-500 p-4 hidden">No recent sessions.</p>
+            </nav>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <!-- Feature 1 -->
-                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
-                            <div
-                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 flex items-center justify-center">
-                                <i data-feather="target" class="w-8 h-8 text-white"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold mb-4">Personalized Learning</h3>
-                            <p class="text-gray-300">AI-powered recommendations based on your interests and learning
-                                style.</p>
+            <div class="p-4 border-t border-gray-700 text-sm">
+                <a href="#" class="block text-gray-400 hover:text-white transition-colors" onclick="logout()">
+                    <i data-feather="log-out" class="w-4 h-4 mr-2 inline"></i> Logout
+                </a>
+            </div>
+        </aside>
+
+        <main class="flex flex-col flex-grow relative">
+            <header class="h-16 flex-shrink-0 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between px-4 transition-colors duration-300">
+                <button id="sidebar-open-btn" class="text-gray-900 dark:text-white md:hidden p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <i data-feather="menu" class="w-6 h-6"></i>
+                </button>
+                <h1 class="text-xl font-semibold text-gray-900 dark:text-white" id="current-session-title">
+                    Welcome to VTA
+                </h1>
+
+                <div class="flex items-center space-x-4">
+                    
+                    <div id="pomodoro-timer" class="flex items-center space-x-2 p-2 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 cursor-pointer" title="Pomodoro Focus Timer">
+                        <i data-feather="clock" class="w-5 h-5"></i>
+                        <span id="timer-display" class="font-bold">25:00</span>
+                    </div>
+                    
+                    <button id="theme-toggle" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300">
+                        <i data-feather="sun" id="theme-icon" class="w-6 h-6"></i>
+                    </button>
+                    
+                    <button id="profile-icon" class="flex items-center space-x-2 text-gray-900 dark:text-white">
+                        <div class="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 flex items-center justify-center">
+                            <i data-feather="user" class="w-4 h-4 text-white"></i>
                         </div>
+                        <span class="text-sm font-medium hidden sm:inline" id="user-greeting-vta">User</span>
+                    </button>
+                </div>
+            </header>
 
-                        <!-- Feature 2 -->
-                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
-                            <div
-                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-green-600 to-teal-500 flex items-center justify-center">
-                                <i data-feather="users" class="w-8 h-8 text-white"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold mb-4">Community Driven</h3>
-                            <p class="text-gray-300">Connect with like-minded learners and share your journey.</p>
-                        </div>
+            <div id="emotion-awareness-box" class="fixed right-4 top-20 z-40 p-3 bg-white dark:bg-gray-700 rounded-xl shadow-xl border border-gray-200 dark:border-gray-600 w-48 text-center transition-colors duration-300">
+                <h3 class="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Live Emotion</h3>
+                
+                <div id="webcam-placeholder" class="bg-gray-200 dark:bg-gray-600 h-16 w-16 mx-auto rounded-full flex items-center justify-center mb-2">
+                    <i data-feather="video-off" class="w-8 h-8 text-gray-500"></i>
+                </div>
+                <video id="webcam-feed" autoplay class="hidden h-16 w-16 mx-auto rounded-full object-cover mb-2"></video>
+                
+                <p id="detected-emotion" class="text-lg font-bold text-green-600 dark:text-green-400">Neutral</p>
+                <button id="start-webcam-btn" class="mt-2 text-xs text-blue-500 hover:underline">Start Webcam</button>
+            </div>
 
-                        <!-- Feature 3 -->
-                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
-                            <div
-                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-orange-600 to-red-500 flex items-center justify-center">
-                                <i data-feather="zap" class="w-8 h-8 text-white"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold mb-4">Real-time Progress</h3>
-                            <p class="text-gray-300">Track your growth and celebrate milestones along the way.</p>
-                        </div>
-
-                        <!-- Feature 4 -->
-                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
-                            <div
-                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-pink-600 to-purple-500 flex items-center justify-center">
-                                <i data-feather="book-open" class="w-8 h-8 text-white"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold mb-4">Rich Content</h3>
-                            <p class="text-gray-300">Access thousands of courses, tutorials, and interactive materials.
-                            </p>
-                        </div>
-
-                        <!-- Feature 5 -->
-                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
-                            <div
-                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-indigo-600 to-blue-500 flex items-center justify-center">
-                                <i data-feather="award" class="w-8 h-8 text-white"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold mb-4">Achievements</h3>
-                            <p class="text-gray-300">Earn badges and certificates as you complete your learning goals.
-                            </p>
-                        </div>
-
-                        <!-- Feature 6 -->
-                        <div class="gateway-form p-8 text-center hover:scale-105 transition-transform duration-300">
-                            <div
-                                class="w-16 h-16 mx-auto mb-6 rounded-full bg-gradient-to-r from-yellow-600 to-orange-500 flex items-center justify-center">
-                                <i data-feather="trending-up" class="w-8 h-8 text-white"></i>
-                            </div>
-                            <h3 class="text-xl font-semibold mb-4">Analytics</h3>
-                            <p class="text-gray-300">Detailed insights into your learning patterns and performance.</p>
+            <div id="chat-area" class="flex-grow overflow-y-auto p-6 pb-24 space-y-4">
+                <div id="messages-container" class="max-w-4xl mx-auto">
+                    <div class="flex justify-start">
+                        <div class="bg-blue-100 dark:bg-blue-800 p-3 rounded-xl max-w-lg text-sm shadow">
+                            <p class="text-blue-900 dark:text-blue-100 font-medium">Welcome! I'm your Emotion-Aware VTA. How can I help you learn today?</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Call to Action Section -->
-            <div class="py-20">
-                <div class="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
-                    <div class="gateway-form p-12">
-                        <h2 class="text-3xl md:text-4xl font-bold mb-6">Ready to Begin?</h2>
-                        <p class="text-xl text-gray-300 mb-8">
-                            Your personalized learning journey is just one click away.
-                        </p>
-                        <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                            <button
-                                class="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full font-medium text-lg hover:opacity-90 transition-all duration-300"
-                                onclick="simulateLoading()">
-                                Start Learning
-                            </button>
-                            <button
-                                class="px-8 py-3 border border-gray-600 rounded-full font-medium text-lg hover:bg-gray-800 transition-all duration-300">
-                                Explore Features
-                            </button>
-                        </div>
-                    </div>
+            <div class="absolute bottom-0 left-0 right-0 p-4 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700">
+                <div class="max-w-4xl mx-auto flex items-center space-x-3">
+                    
+                    <button id="mic-toggle-btn" class="p-3 rounded-full bg-red-500 hover:bg-red-600 text-white transition-colors duration-200 shadow-md" title="Toggle Voice Input">
+                        <i data-feather="mic" class="w-6 h-6"></i>
+                    </button>
+
+                    <input type="text" id="user-input" placeholder="Ask VTA a question or type your prompt..."
+                        class="flex-grow px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                        autofocus>
+                    
+                    <button id="send-message-btn" class="p-3 rounded-full bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-200 shadow-md">
+                        <i data-feather="send" class="w-6 h-6"></i>
+                    </button>
                 </div>
             </div>
-        </div>
-
-        <!-- Footer -->
-        <footer class="bg-gray-800 border-t border-gray-700">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                    <div class="col-span-1 md:col-span-2">
-                        <h3 class="text-2xl font-bold text-white mb-4">The Gateway</h3>
-                        <p class="text-gray-300 mb-4">
-                            Empowering learners worldwide with personalized, AI-driven educational experiences.
-                        </p>
-                        <div class="flex space-x-4">
-                            <button class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition">
-                                <i data-feather="github" class="w-5 h-5 text-gray-300"></i>
-                            </button>
-                            <button class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition">
-                                <i data-feather="twitter" class="w-5 h-5 text-gray-300"></i>
-                            </button>
-                            <button class="p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition">
-                                <i data-feather="linkedin" class="w-5 h-5 text-gray-300"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div>
-                        <h4 class="text-lg font-semibold text-white mb-4">Quick Links</h4>
-                        <ul class="space-y-2">
-                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">About Us</a></li>
-                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Courses</a></li>
-                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Community</a></li>
-                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Support</a></li>
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h4 class="text-lg font-semibold text-white mb-4">Legal</h4>
-                        <ul class="space-y-2">
-                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Privacy Policy</a>
-                            </li>
-                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Terms of
-                                    Service</a></li>
-                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Cookie Policy</a>
-                            </li>
-                            <li><a href="#" class="text-gray-300 hover:text-white transition-colors">Contact</a></li>
-                    </div>
-                </div>
-            </div>
-
-            <div class="border-t border-gray-700 mt-8 pt-8 text-center">
-                <p class="text-gray-400">&copy; 2025 The Gateway. All rights reserved.</p>
-            </div>
+        </main>
     </div>
     </footer>
     </div>
@@ -672,7 +544,11 @@
             easing: 'ease-in-out',
             once: true
         });
-
+        const API_BASE = 'http://127.0.0.1:5000/api';
+        let currentConversationId = null;
+        let currentEmotion = "Neutral";
+        let socket; 
+        let mediaRecorder; // Global variable for audio recording
         // Initialize static globe (non-moving)
         function initializeStaticGlobe() {
             try {
@@ -717,7 +593,11 @@
             }
         }
         
-        window.onload = function(){
+        window.onload = function() {
+            // 1. Initialize global dependencies (AOS for animations, Vanta for background, Feather icons)
+            AOS.init({ duration: 800, easing: 'ease-in-out', once: true });
+            feather.replace();
+
             VANTA.GLOBE({
                 el: "#vanta-bg",
                 mouseControls: true,
@@ -731,31 +611,26 @@
                 backgroundColor: 0x111827,
                 size: 0.8
             });
-            feather.replace();
+            
+            // 2. Run the session check. This function will call initializeVTA() 
+            //    if the user is already logged in (i.e., returning users).
+            checkLoginStatus(); 
 
-            fetch('http://127.0.0.1:5000/check_session')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.is_authenticated) {
-                        // User is authenticated, show main page
-                        document.getElementById('stage-1').classList.add('hidden');
-                        document.getElementById('main-page').classList.remove('hidden');
-                        
-                        // Update greeting with username from backend
-                        document.getElementById('user-greeting').textContent = `Welcome back, ${data.username}!`;
-                        
-                        // Initialize static globe for the main page
-                        initializeStaticGlobe();
-                    } else {
-                        // Not authenticated, show the login page
-                        document.getElementById('stage-1').classList.remove('hidden');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error checking session:', error);
-                    document.getElementById('stage-1').classList.remove('hidden');
-                });
-        };            
+            // 3. Attach listeners to previous stages (keep existing logic)
+            document.getElementById('show-signup')?.addEventListener('click', function () {
+                document.getElementById('stage-1').classList.add('hidden');
+                document.getElementById('signup-page').classList.remove('hidden');
+            });
+
+            document.getElementById('back-to-login')?.addEventListener('click', function () {
+                document.getElementById('signup-page').classList.add('hidden');
+                document.getElementById('stage-1').classList.remove('hidden');
+            });
+
+            // We do NOT attach the login/signup/profile handlers here. They are 
+            // handled by their own functions (login(), signup(), update_profile()) 
+            // already defined in your code.
+        };           
             
         const interests = [
             "Fantasy Novels", "Coding", "Hiking", "Action Movies",
@@ -1083,47 +958,57 @@
         });
 
         // Confirm Profile Button
-        document.getElementById('confirm-profile-btn').addEventListener('click', function () {
-            // Show quote page after profile confirmation
+                // Listener for the final step of the profile setup (new users)
+        document.getElementById('confirm-profile-btn')?.addEventListener('click', function () {
+            // Hide Stage 5, show the Quote Page
             document.getElementById('stage-5').classList.add('hidden');
             document.getElementById('quote-page').classList.remove('hidden');
 
-            // Automatically proceed to main page after 4 seconds
+            // After a delay on the Quote Page, transition to the VTA main chat interface
             setTimeout(() => {
                 document.getElementById('quote-page').classList.add('hidden');
                 document.getElementById('main-page').classList.remove('hidden');
 
-                // Update user greeting with their name
-                const userName = document.getElementById('signup-name').value.trim() || 'Learner';
-                document.getElementById('user-greeting').textContent = `Welcome back, ${userName}!`;
-
-                // Initialize static globe
-                initializeStaticGlobe();
-            }, 4000);
+                // This is the crucial call: initialize the VTA-specific functionality
+                initializeVTA(); 
+            }, 4000); // 4 seconds delay from quote page
         });
 
         // to check the login status
+        // --- New/Updated checkLoginStatus function ---
         function checkLoginStatus() {
             fetch('http://127.0.0.1:5000/check_session')
                 .then(response => response.json())
                 .then(data => {
                     if (data.is_authenticated) {
-                        // User is logged in, show the main page
+                        // User is logged in. Hide login stages and show main page.
                         document.getElementById('stage-1').classList.add('hidden');
                         document.getElementById('main-page').classList.remove('hidden');
 
-                        // Update greeting
+                        // Update greeting with username and set theme
                         const userName = data.username || 'Learner';
-                        document.getElementById('user-greeting').textContent = `Welcome back, ${userName}!`;
+                        document.getElementById('user-greeting-vta').textContent = userName; // New VTA greeting
+                        
+                        // Apply saved theme (dark/light mode)
+                        if (data.theme === 'dark') {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
 
-                        // Initialize the static globe on the main page
-                        initializeStaticGlobe();
+                        // *** CRUCIAL: Initialize the VTA chat interface ***
+                        initializeVTA();
+                    } else {
+                        // Not authenticated, ensure only the login page is shown
+                        document.getElementById('stage-1').classList.remove('hidden');
                     }
                 })
                 .catch(error => {
-                    console.log("Not logged in. Showing login page.");
+                    console.error('Error checking session:', error);
+                    document.getElementById('stage-1').classList.remove('hidden');
                 });
         }
+// ---------------------------------------------
 
 
         // Simulate loading with moving globe
@@ -1146,6 +1031,369 @@
 
                 alert('Loading complete! This is where your learning content would appear.');
             }, 3000);
+        }
+
+        function get_api_endpoint(path) {
+            return `http://127.0.0.1:5000${path}`;
+        }
+
+        async function fetch_data(path, method = 'GET', body = null) {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+            if (body) {
+                options.body = JSON.stringify(body);
+            }
+            const response = await fetch(get_api_endpoint(path), options);
+            return response.json();
+        }
+
+        // --- DARK/LIGHT MODE ---
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            const newTheme = isDark ? 'dark' : 'light';
+            
+            // Update theme icon
+            document.getElementById('theme-icon').setAttribute('data-feather', isDark ? 'sun' : 'moon');
+            feather.replace();
+
+            // Update backend setting
+            fetch_data('/settings/theme', 'PUT', { theme: newTheme })
+                .then(data => console.log('Theme saved:', data))
+                .catch(error => console.error('Failed to save theme:', error));
+        }
+
+        // --- POMODORO TIMER ---
+
+        let timerInterval = null;
+        let isTimerRunning = false;
+        let totalSeconds = 25 * 60; // Default 25 minutes
+        const timerDisplay = document.getElementById('timer-display');
+
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+            return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        function updateTimerDisplay() {
+            timerDisplay.textContent = formatTime(totalSeconds);
+        }
+
+        function startPomodoro() {
+            if (isTimerRunning) return;
+
+            isTimerRunning = true;
+            timerInterval = setInterval(() => {
+                totalSeconds--;
+                updateTimerDisplay();
+
+                if (totalSeconds <= 0) {
+                    clearInterval(timerInterval);
+                    isTimerRunning = false;
+                    alert("Pomodoro session complete! Take a 5-minute break.");
+                    totalSeconds = 25 * 60; // Reset for next session
+                    updateTimerDisplay();
+                }
+            }, 1000);
+            timerDisplay.closest('div').classList.replace('bg-yellow-100', 'bg-green-100');
+            timerDisplay.closest('div').classList.replace('text-yellow-800', 'text-green-800');
+        }
+
+        document.getElementById('pomodoro-timer').addEventListener('click', startPomodoro);
+
+
+        // --- CHAT & SESSION MANAGEMENT ---
+
+        function createMessageElement(sender, content, emotion = null) {
+            const isVTA = sender === 'vta';
+            const align = isVTA ? 'justify-start' : 'justify-end';
+            const bgColor = isVTA ? 'bg-blue-100 dark:bg-blue-800' : 'bg-green-100 dark:bg-green-700';
+            const textColor = isVTA ? 'text-blue-900 dark:text-blue-100' : 'text-green-900 dark:text-green-100';
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `flex ${align}`;
+            messageDiv.innerHTML = `
+                <div class="${bgColor} p-3 rounded-xl max-w-lg text-sm shadow">
+                    <p class="${textColor}">${content}</p>
+                    ${emotion ? `<p class="text-xs mt-1 italic text-gray-500 dark:text-gray-400">Emotion: ${emotion}</p>` : ''}
+                </div>
+            `;
+            return messageDiv;
+        }
+
+        function scrollToBottom() {
+            const chatArea = document.getElementById('chat-area');
+            chatArea.scrollTop = chatArea.scrollHeight;
+        }
+
+        async function loadSessionMessages(sessionId) {
+            const container = document.getElementById('messages-container');
+            container.innerHTML = '';
+            currentConversationId = sessionId;
+
+            const data = await fetch_data(`/sessions/${sessionId}/messages`);
+            if (data.success) {
+                document.getElementById('current-session-title').textContent = data.title;
+                data.messages.forEach(msg => {
+                    const el = createMessageElement(msg.sender, msg.content, msg.emotion);
+                    container.appendChild(el);
+                });
+                scrollToBottom();
+            } else {
+                console.error('Failed to load session:', data.message);
+            }
+        }
+
+        async function fetchRecentSessions() {
+            const list = document.getElementById('session-list');
+            const noSessions = document.getElementById('no-sessions');
+            list.innerHTML = '';
+
+            const data = await fetch_data('/sessions');
+            if (data.success && data.sessions.length > 0) {
+                noSessions.classList.add('hidden');
+                data.sessions.forEach(session => {
+                    const item = document.createElement('div');
+                    item.className = 'p-3 hover:bg-gray-700 rounded-lg cursor-pointer transition-colors';
+                    item.setAttribute('data-session-id', session.id);
+                    item.innerHTML = `
+                        <p class="text-sm font-medium truncate">${session.title}</p>
+                        <span class="text-xs text-gray-400">${session.created_at}</span>
+                    `;
+                    item.addEventListener('click', () => loadSessionMessages(session.id));
+                    list.appendChild(item);
+                });
+                // Load the most recent session automatically
+                if (data.sessions[0].id && !currentConversationId) {
+                    loadSessionMessages(data.sessions[0].id);
+                }
+            } else {
+                noSessions.classList.remove('hidden');
+                // Automatically create a new session if none exist
+                if (!currentConversationId) {
+                    await startNewSession();
+                }
+            }
+        }
+
+        async function startNewSession() {
+            const data = await fetch_data('/sessions/new', 'POST', {});
+            if (data.success) {
+                // Set new session ID and reload sessions list
+                currentConversationId = data.conversation_id;
+                document.getElementById('messages-container').innerHTML = '';
+                const welcomeEl = createMessageElement('vta', data.welcome_message);
+                document.getElementById('messages-container').appendChild(welcomeEl);
+                document.getElementById('current-session-title').textContent = data.title;
+                fetchRecentSessions(); // Refresh sidebar
+                scrollToBottom();
+            } else {
+                alert('Failed to start new session: ' + data.message);
+            }
+        }
+
+        async function sendMessage(message) {
+            if (!message.trim() || !currentConversationId) return;
+
+            const inputField = document.getElementById('user-input');
+            inputField.value = '';
+            
+            // Display user message immediately
+            const userEl = createMessageElement('user', message, currentEmotion);
+            document.getElementById('messages-container').appendChild(userEl);
+            scrollToBottom();
+
+            // Call chat API
+            const data = await fetch_data('/chat', 'POST', {
+                message: message,
+                conversation_id: currentConversationId,
+                emotion_detected: currentEmotion 
+            });
+
+            if (data.success) {
+                // Simulate text streaming effect for VTA response
+                const vtaMessage = data.vta_response;
+                const vtaEl = createMessageElement('vta', '', 'VTA'); // Placeholder element
+                document.getElementById('messages-container').appendChild(vtaEl);
+
+                let charIndex = 0;
+                const typingInterval = setInterval(() => {
+                    if (charIndex < vtaMessage.length) {
+                        vtaEl.querySelector('p').textContent += vtaMessage.charAt(charIndex);
+                        charIndex++;
+                        scrollToBottom();
+                    } else {
+                        clearInterval(typingInterval);
+                        vtaEl.innerHTML = createMessageElement('vta', vtaMessage).innerHTML; // Final clean state
+                        scrollToBottom();
+                    }
+                }, 15); // Typing speed in milliseconds
+                
+            } else {
+                alert('VTA Error: ' + data.message);
+            }
+        }
+
+        document.getElementById('send-message-btn').addEventListener('click', () => {
+            const message = document.getElementById('user-input').value;
+            sendMessage(message);
+        });
+
+        document.getElementById('user-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage(document.getElementById('user-input').value);
+            }
+        });
+
+        document.getElementById('new-session-btn').addEventListener('click', startNewSession);
+
+
+        // --- REAL-TIME MEDIA & SOCKET.IO ---
+
+        function initializeSocketIO() {
+            socket = io.connect('http://127.0.0.1:5000');
+            
+            socket.on('connect', () => {
+                console.log('Socket.IO Connected!');
+            });
+
+            // Listener for emotion updates from the backend
+            socket.on('video_response', (data) => {
+                const emotion = data.emotion || "Undetected";
+                document.getElementById('detected-emotion').textContent = emotion;
+                currentEmotion = emotion;
+                // Optionally update the color/icon of the emotion box based on emotion
+            });
+
+            // Listener for audio response (transcription + voice emotion)
+            socket.on('audio_response', (data) => {
+                const inputField = document.getElementById('user-input');
+                inputField.value = data.transcription || '';
+                console.log(`Voice Emotion: ${data.emotion}`);
+                // Can optionally set the currentEmotion to the voice emotion here
+                // currentEmotion = data.emotion;
+                // If transcribed, the user can then hit send to submit the text message
+            });
+        }
+
+        // Webcam stream for facial emotion
+        async function startWebcamStream() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoElement = document.getElementById('webcam-feed');
+                const placeholder = document.getElementById('webcam-placeholder');
+                
+                videoElement.srcObject = stream;
+                videoElement.classList.remove('hidden');
+                placeholder.classList.add('hidden');
+                document.getElementById('start-webcam-btn').textContent = 'Streaming...';
+
+                // Stream video frames to Flask-SocketIO every 100ms
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                
+                setInterval(() => {
+                    if (videoElement.readyState === videoElement.HAVE_ENOUGH_DATA) {
+                        canvas.width = videoElement.videoWidth;
+                        canvas.height = videoElement.videoHeight;
+                        context.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
+                        const dataURL = canvas.toDataURL('image/jpeg'); // Send image data
+                        socket.emit('video_stream', { frame: dataURL });
+                    }
+                }, 100);
+
+            } catch (err) {
+                console.error("Error accessing webcam: ", err);
+                alert("Could not start webcam. Please ensure permissions are granted.");
+            }
+        }
+
+        document.getElementById('start-webcam-btn').addEventListener('click', startWebcamStream);
+
+
+        // Microphone stream for voice emotion/STT (Placeholder for more complex logic)
+        document.getElementById('mic-toggle-btn').addEventListener('click', async () => {
+            const micBtn = document.getElementById('mic-toggle-btn');
+            if (!mediaRecorder) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    micBtn.classList.replace('bg-red-500', 'bg-red-700');
+                    micBtn.classList.add('animate-pulse');
+                    
+                    mediaRecorder = new MediaRecorder(stream);
+                    let audioChunks = [];
+
+                    mediaRecorder.ondataavailable = event => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { 'type' : 'audio/wav' }); // or 'audio/webm'
+                        console.log('Sending audio blob to server...');
+                        // Send the audio blob data to the backend for processing
+                        // Note: Actual streaming of a large blob needs proper handling. 
+                        // For a prototype, sending the full blob on stop is simpler.
+                        socket.emit('audio_stream', { audio: audioBlob }); 
+                        
+                        audioChunks = [];
+                        micBtn.classList.replace('bg-red-700', 'bg-red-500');
+                        micBtn.classList.remove('animate-pulse');
+                        mediaRecorder = null; // Reset recorder for next use
+                    };
+
+                    mediaRecorder.start();
+                    micBtn.setAttribute('title', 'Recording... Click to Stop');
+
+                } catch (err) {
+                    console.error("Error accessing microphone: ", err);
+                    alert("Could not start microphone. Please ensure permissions are granted.");
+                }
+            } else {
+                // Stop recording and send data
+                mediaRecorder.stop();
+                micBtn.setAttribute('title', 'Toggle Voice Input');
+            }
+        });
+
+
+        // --- GLOBAL SETUP ---
+
+        function initializeVTA() {
+            feather.replace();
+            initializeSocketIO();
+            fetchRecentSessions();
+            
+            // Setup event listeners for the new chat interface
+            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
+            document.getElementById('sidebar-open-btn').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.remove('-translate-x-full');
+            });
+            document.getElementById('sidebar-close-btn').addEventListener('click', () => {
+                document.getElementById('sidebar').classList.add('-translate-x-full');
+            });
+            
+            // Initial theme check (to set the icon correctly)
+            const isDark = document.documentElement.classList.contains('dark');
+            document.getElementById('theme-icon').setAttribute('data-feather', isDark ? 'sun' : 'moon');
+            
+            // Set user greeting from session check (already in original index.html)
+            fetch('http://127.0.0.1:5000/check_session')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.is_authenticated) {
+                        document.getElementById('user-greeting-vta').textContent = data.username;
+                        if (data.theme === 'dark') {
+                            document.documentElement.classList.add('dark');
+                        } else {
+                            document.documentElement.classList.remove('dark');
+                        }
+                    }
+                });
         }
 
         function initializePage() {
