@@ -384,7 +384,6 @@ def handle_video_stream(data):
     import random
     emotions = ['Neutral', 'Angry', 'Disgust', 'Fear', 'Happy', 'Boredom', 'Surprise', 'Calm']
     detected_emotion = random.choice(emotions)
-
     # Emit the real-time emotion back to the client that sent the stream
     emit('video_response', {'emotion': detected_emotion})
 

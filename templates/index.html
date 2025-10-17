@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Gateway</title>
+    <title>Emotion-Aware Virtual Teaching Assistant</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -428,6 +428,15 @@
         </div>
     </div>
 
+    <div id="profile-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center">
+        <div class="gateway-form p-10 max-w-5xl w-full text-center relative" style="max-height: 90vh; overflow-y: auto;">
+            <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="absolute top-4 right-4 text-white hover:text-gray-400">
+                <i data-feather="x" class="w-6 h-6"></i>
+            </button>
+            <h1 class="text-3xl font-bold mb-4">Your Profile Summary</h1>
+            <div id="modal-summary-content"></div> 
+        </div>
+    </div>
     <!-- Main Website Page -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
@@ -474,6 +483,18 @@
                     Welcome to VTA
                 </h1>
 
+                <header class="...">
+                    ...
+                    <h1 class="... font-semibold ...">
+                        <span id="current-session-title">Welcome to VTA</span>
+                    </h1>
+
+                    <div id="emotion-feedback-banner" class="text-sm font-medium text-center px-4 py-1 rounded-full text-white hidden">
+                        VTA is ready to adapt!
+                    </div>
+                    ...
+                </header>
+
                 <div class="flex items-center space-x-4">
                     
                     <div id="pomodoro-timer" class="flex items-center space-x-2 p-2 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 cursor-pointer" title="Pomodoro Focus Timer">
@@ -493,6 +514,16 @@
                     </button>
                 </div>
             </header>
+
+            <div id="profile-modal" class="hidden fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center">
+                <div class="gateway-form p-10 max-w-5xl w-full text-center relative" style="max-height: 90vh; overflow-y: auto;">
+                    <button onclick="document.getElementById('profile-modal').classList.add('hidden')" class="absolute top-4 right-4 text-white hover:text-gray-400">
+                        <i data-feather="x" class="w-6 h-6"></i>
+                    </button>
+                    <h1 class="text-3xl font-bold mb-4">Your Profile Summary</h1>
+                    <div id="modal-summary-content"></div> 
+                </div>
+            </div>
 
             <div id="emotion-awareness-box" class="fixed right-4 top-20 z-40 p-3 bg-white dark:bg-gray-700 rounded-xl shadow-xl border border-gray-200 dark:border-gray-600 w-48 text-center transition-colors duration-300">
                 <h3 class="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Live Emotion</h3>
@@ -1067,25 +1098,67 @@
                 .catch(error => console.error('Failed to save theme:', error));
         }
 
+        // Logout
+        function logout() {
+            fetch('http://127.0.0.1:5000/logout')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Clear state and redirect to force session check
+                        window.location.href = "/"; 
+                    } else {
+                        alert('Logout failed.');
+                    }
+                })
+                .catch(error => console.error('Logout error:', error));
+        }
+
         // --- POMODORO TIMER ---
 
         let timerInterval = null;
         let isTimerRunning = false;
         let totalSeconds = 25 * 60; // Default 25 minutes
-        const timerDisplay = document.getElementById('timer-display');
+        let currentMode = 'work'; // 'work' or 'break'
 
-        function formatTime(seconds) {
-            const min = Math.floor(seconds / 60);
-            const sec = seconds % 60;
-            return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+        function notifyUser(title, body) {
+            if (!("Notification" in window)) {
+                // Fallback to alert if Notification API is not supported
+                alert(title + " - " + body); 
+            } else if (Notification.permission === "granted") {
+                new Notification(title, { body: body, icon: "https://i.imgur.com/B948u3o.png" }); // Placeholder icon
+            } else if (Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        new Notification(title, { body: body, icon: "https://i.imgur.com/B948u3o.png" });
+                    }
+                });
+            }
         }
 
-        function updateTimerDisplay() {
-            timerDisplay.textContent = formatTime(totalSeconds);
+        function switchMode() {
+            if (currentMode === 'work') {
+                currentMode = 'break';
+                totalSeconds = 5 * 60; // 5 minutes break
+                timerDisplay.closest('div').classList.replace('bg-green-100', 'bg-red-100');
+                timerDisplay.closest('div').classList.replace('text-green-800', 'text-red-800');
+                notifyUser("Time for a Break!", "Start your 5-minute break now.");
+            } else {
+                currentMode = 'work';
+                totalSeconds = 25 * 60; // 25 minutes work
+                timerDisplay.closest('div').classList.replace('bg-red-100', 'bg-green-100');
+                timerDisplay.closest('div').classList.replace('text-red-800', 'text-green-800');
+                notifyUser("Break is Over!", "Time to focus again for 25 minutes.");
+            }
+            updateTimerDisplay();
         }
 
         function startPomodoro() {
-            if (isTimerRunning) return;
+            if (isTimerRunning) {
+                clearInterval(timerInterval);
+                isTimerRunning = false;
+                // Optionally add a Pause/Resume button state here
+                return; 
+            }
 
             isTimerRunning = true;
             timerInterval = setInterval(() => {
@@ -1095,18 +1168,26 @@
                 if (totalSeconds <= 0) {
                     clearInterval(timerInterval);
                     isTimerRunning = false;
-                    alert("Pomodoro session complete! Take a 5-minute break.");
-                    totalSeconds = 25 * 60; // Reset for next session
-                    updateTimerDisplay();
+                    switchMode(); // Automatically switches to break or work mode
+                    startPomodoro(); // Auto-start the next timer
                 }
             }, 1000);
-            timerDisplay.closest('div').classList.replace('bg-yellow-100', 'bg-green-100');
-            timerDisplay.closest('div').classList.replace('text-yellow-800', 'text-green-800');
+
+            // Initial state setup
+            if (currentMode === 'work') {
+                timerDisplay.closest('div').classList.replace('bg-yellow-100', 'bg-green-100');
+                timerDisplay.closest('div').classList.replace('text-yellow-800', 'text-green-800');
+            } else {
+                timerDisplay.closest('div').classList.replace('bg-yellow-100', 'bg-red-100');
+                timerDisplay.closest('div').classList.replace('text-yellow-800', 'text-red-800');
+            }
         }
 
+        // Update the initial event listener in the script to request notification permission:
         document.getElementById('pomodoro-timer').addEventListener('click', startPomodoro);
-
-
+        if ("Notification" in window) {
+            Notification.requestPermission();
+        }
         // --- CHAT & SESSION MANAGEMENT ---
 
         function createMessageElement(sender, content, emotion = null) {
@@ -1267,7 +1348,26 @@
                 const emotion = data.emotion || "Undetected";
                 document.getElementById('detected-emotion').textContent = emotion;
                 currentEmotion = emotion;
-                // Optionally update the color/icon of the emotion box based on emotion
+
+                // NEW: Update Feedback Banner
+                const banner = document.getElementById('emotion-feedback-banner');
+                let message = `VTA detects you are **${emotion.toUpperCase()}**! Keep focused.`;
+                let color = 'bg-blue-600';
+
+                if (emotion === 'Angry' || emotion === 'Frustrated' || emotion === 'Disgust') {
+                    message = `Take a break! You seem **${emotion.toUpperCase()}**.`;
+                    color = 'bg-red-600';
+                } else if (emotion === 'Happy' || emotion === 'Excited') {
+                    message = `That's great! You seem **${emotion.toUpperCase()}**. Let's keep this energy!`;
+                    color = 'bg-green-600';
+                } else if (emotion === 'Boredom') {
+                    message = `I see **BOREDOM**. Let's try a different teaching style.`;
+                    color = 'bg-yellow-600';
+                }
+                
+                banner.textContent = message.replace(/\*\*/g, ''); // Use textContent for safety, remove bold markers
+                banner.className = `text-sm font-medium text-center px-4 py-1 rounded-full text-white ${color}`; // Set color
+                banner.classList.remove('hidden');
             });
 
             // Listener for audio response (transcription + voice emotion)
@@ -1280,7 +1380,17 @@
                 // If transcribed, the user can then hit send to submit the text message
             });
         }
+        // Profile icon
+        document.getElementById('profile-icon').addEventListener('click', function() {
+            const summaryContent = document.getElementById('stage-5').querySelector('.gateway-form').innerHTML;
+            document.getElementById('modal-summary-content').innerHTML = summaryContent;
 
+            populateProfileSummary();
+            
+            document.getElementById('modal-summary-content').querySelector('.space-y-4')?.classList.add('hidden');
+            document.getElementById('profile-modal').classList.remove('hidden');
+            feather.replace(); 
+        });
         // Webcam stream for facial emotion
         async function startWebcamStream() {
             try {
