@@ -256,12 +256,14 @@ def chat_message():
     # 2. Simulate LLM Response (Placeholder)
     # Use user context/likes/dislikes to generate a slightly personalized placeholder response
     context_text = g.user.context if g.user.context else "a student"
-    likes_text = f"likes {g.user.likes}" if g.user.likes else ""
+    likes_text = f"who likes {g.user.likes}" if g.user.likes else ""
     
+    # **START OF MODIFIED CODE BLOCK - ENHANCED VTA RESPONSE**
     llm_response_content = (
-        f"Hello, I am your Emotion-Aware VTA. I noticed you are feeling **{emotion_detected.upper()}** right now. "
-        f"Since you are **{context_text}** {likes_text}, let's start with a topic that might interest you! "
-        f"What subject would you like to explore today? ({message_content})"
+        f"Hello **{g.user.username}**! I've registered your emotion as **{emotion_detected.upper()}**. "
+        f"As you are a **{context_text}** {likes_text}, I can tailor my teaching. "
+        f"Let's focus on your question about: '{message_content}'. "
+        f"Tell me more about what you already know about this topic."
     )
     
     # 3. Save VTA Response
@@ -346,29 +348,6 @@ def get_session_messages(session_id):
     } for m in messages]
 
     return jsonify({'success': True, 'messages': message_list, 'title': conversation.title}), 200
-
-
-# --- SETTINGS API ---
-
-# API to update and retrieve user theme preference
-@app.route('/api/settings/theme', methods=['GET', 'PUT'])
-@login_required
-def handle_theme_setting():
-    user = g.user
-    
-    if request.method == 'GET':
-        return jsonify({'success': True, 'theme': user.theme}), 200
-        
-    elif request.method == 'PUT':
-        data = request.get_json()
-        new_theme = data.get('theme')
-
-        if new_theme not in ['dark', 'light']:
-            return jsonify({'success': False, 'message': 'Invalid theme value. Must be "dark" or "light"'}), 400
-        
-        user.theme = new_theme
-        db.session.commit()
-        return jsonify({'success': True, 'message': 'Theme updated successfully', 'theme': user.theme}), 200
 
 
 # --- SOCKETIO (Real-Time Emotion Detection) ---

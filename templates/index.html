@@ -502,10 +502,6 @@
                         <span id="timer-display" class="font-bold">25:00</span>
                     </div>
                     
-                    <button id="theme-toggle" class="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors duration-300">
-                        <i data-feather="sun" id="theme-icon" class="w-6 h-6"></i>
-                    </button>
-                    
                     <button id="profile-icon" class="flex items-center space-x-2 text-gray-900 dark:text-white">
                         <div class="h-8 w-8 rounded-full bg-gradient-to-r from-purple-600 to-blue-500 flex items-center justify-center">
                             <i data-feather="user" class="w-4 h-4 text-white"></i>
@@ -1082,22 +1078,6 @@
             return response.json();
         }
 
-        // --- DARK/LIGHT MODE ---
-
-        function toggleTheme() {
-            const isDark = document.documentElement.classList.toggle('dark');
-            const newTheme = isDark ? 'dark' : 'light';
-            
-            // Update theme icon
-            document.getElementById('theme-icon').setAttribute('data-feather', isDark ? 'sun' : 'moon');
-            feather.replace();
-
-            // Update backend setting
-            fetch_data('/settings/theme', 'PUT', { theme: newTheme })
-                .then(data => console.log('Theme saved:', data))
-                .catch(error => console.error('Failed to save theme:', error));
-        }
-
         // Logout
         function logout() {
             fetch('http://127.0.0.1:5000/logout')
@@ -1150,6 +1130,17 @@
                 notifyUser("Break is Over!", "Time to focus again for 25 minutes.");
             }
             updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            const timerDisplay = document.getElementById('timer-display');
+            if (timerDisplay) {
+                timerDisplay.textContent = `${minutes}:${seconds}`;
+                // Update the browser tab title for better focus tracking
+                document.title = `(${minutes}:${seconds}) VTA Focus Time`;
+            }
         }
 
         function startPomodoro() {
@@ -1290,7 +1281,7 @@
             scrollToBottom();
 
             // Call chat API
-            const data = await fetch_data('/chat', 'POST', {
+            const data = await fetch_data('/api/chat', 'POST', {
                 message: message,
                 conversation_id: currentConversationId,
                 emotion_detected: currentEmotion 
@@ -1415,7 +1406,7 @@
                         const dataURL = canvas.toDataURL('image/jpeg'); // Send image data
                         socket.emit('video_stream', { frame: dataURL });
                     }
-                }, 100);
+                }, 5000);
 
             } catch (err) {
                 console.error("Error accessing webcam: ", err);
@@ -1478,8 +1469,6 @@
             initializeSocketIO();
             fetchRecentSessions();
             
-            // Setup event listeners for the new chat interface
-            document.getElementById('theme-toggle').addEventListener('click', toggleTheme);
             document.getElementById('sidebar-open-btn').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.remove('-translate-x-full');
             });
@@ -1487,9 +1476,6 @@
                 document.getElementById('sidebar').classList.add('-translate-x-full');
             });
             
-            // Initial theme check (to set the icon correctly)
-            const isDark = document.documentElement.classList.contains('dark');
-            document.getElementById('theme-icon').setAttribute('data-feather', isDark ? 'sun' : 'moon');
             
             // Set user greeting from session check (already in original index.html)
             fetch('http://127.0.0.1:5000/check_session')
