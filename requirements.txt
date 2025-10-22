@@ -19,3 +19,4 @@ eventlet==0.33.3
 Flask-Dance==7.1.0
 requests-oauthlib
 google-api-python-client
+gevent

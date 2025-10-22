@@ -1,11 +1,13 @@
-from flask import Flask, jsonify, request, session, redirect, url_for, render_template 
-from flask_socketio import SocketIO
+from flask import Flask, jsonify, request, session, redirect, url_for, render_template, g 
+from flask_socketio import SocketIO, emit
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
 import os
 from dotenv import load_dotenv
-from database import db, User
+from database import db, User, Conversation, Message
 from werkzeug.security import check_password_hash
+from datetime import datetime
+import time # For simulating LLM response time
 
 # Set this environment variable for local testing with HTTP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -25,7 +27,8 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db.init_app(app)
 
 # Wrap Flask app with SocketIO - CORS enabled
-socketio = SocketIO(app, cors_allowed_origins="*")
+# Using eventlet for asynchronous support for real-time video/audio streams
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
 
 # Function to create database tables
 def create_db():
@@ -50,14 +53,48 @@ github_bp = make_github_blueprint(
 app.register_blueprint(google_bp, url_prefix="/login")
 app.register_blueprint(github_bp, url_prefix="/login")
 
+# --- Utility Functions ---
+
+def get_current_user():
+    """Retrieves the current logged-in user."""
+    user_id = session.get('user_id')
+    if user_id:
+        return User.query.get(user_id)
+    return None
+
+def login_required(f):
+    """Decorator to ensure user is logged in."""
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return jsonify({'success': False, 'message': 'Authentication required'}), 401
+        return f(*args, **kwargs)
+    decorated_function.__name__ = f.__name__
+    return decorated_function
+
+# --- Request Hooks ---
+
+@app.before_request
+def load_user_and_theme():
+    """Loads the current user object and their theme into Flask's global context (g)."""
+    g.user = get_current_user()
+    if g.user:
+        # Load user's preferred theme, default to 'dark' if not set
+        g.theme = g.user.theme if g.user.theme in ['dark', 'light'] else 'dark'
+    else:
+        g.theme = 'dark' # Default theme for logged out users
+
+# --- CORE ROUTES ---
+
 # Rendering index.html
 @app.route('/')
 def index():
+    # Frontend will check session via /check_session and render the correct view
     return render_template('index.html')
 
 # Unified handler for all social logins
 @app.route("/login/<provider>/authorized")
 def social_login_handler(provider):
+    # ... (Keep existing Flask-Dance logic) ...
     if provider == 'google':
         service = google
     elif provider == 'github':
@@ -86,7 +123,8 @@ def social_login_handler(provider):
 
     # create a new user if one does not exist
     if not user:
-        user = User(name=name, username=username, email=email, password=os.urandom(16).hex())
+        # For social login, we generate a random password and set social_id
+        user = User(name=name, username=username, email=email, password=os.urandom(16).hex(), social_id=f"{provider}_{email}")
         db.session.add(user)
         db.session.commit()
     
@@ -96,18 +134,17 @@ def social_login_handler(provider):
 # Checking if log-in was successful
 @app.route('/check_session')
 def check_session():
-    user_id = session.get('user_id')
-    if user_id:
-        user = User.query.get(user_id)
-        if user:
-            return jsonify({
-                'is_authenticated': True, 
-                'username': user.username
-            }), 200
+    user = get_current_user()
+    if user:
+        return jsonify({
+            'is_authenticated': True, 
+            'username': user.username,
+            'theme': user.theme
+        }), 200
     
-    return jsonify({'is_authenticated': False}), 200
+    return jsonify({'is_authenticated': False, 'theme': g.theme}), 200
 
-# Sign-up rendering
+# Sign-up handler (Uses the new User model initialization)
 @app.route('/signup', methods=['POST'])
 def signup():
     data = request.get_json()
@@ -128,6 +165,7 @@ def signup():
     if existing_user_email or existing_user_username:
         return jsonify({'success': False, 'message': 'Email or username already registered'}), 409
 
+    # Use the User model constructor which hashes the password
     new_user = User(name=name, username=username, email=email, password=password)
     db.session.add(new_user)
     db.session.commit()
@@ -137,25 +175,24 @@ def signup():
 
     return jsonify({'success': True, 'message': 'User created successfully'}), 201
 
-# for profile updates
+# for profile updates (including likes, dislikes, context)
 @app.route('/api/profile', methods=['PUT'])
+@login_required
 def update_profile():
-    user_id = session.get('user_id')
-    if not user_id:
-        return jsonify({'success': False, 'message': 'Authentication required'}), 401
-
     data = request.get_json()
     likes = data.get('likes')
     dislikes = data.get('dislikes')
     context = data.get('context')
 
-    user = User.query.get(user_id)
-    if not user:
-        return jsonify({'success': False, 'message': 'User not found'}), 404
+    user = g.user # Use user loaded in before_request hook
+    
+    if likes is not None:
+        user.likes = ','.join(likes) if isinstance(likes, list) else likes
+    if dislikes is not None:
+        user.dislikes = ','.join(dislikes) if isinstance(dislikes, list) else dislikes
+    if context is not None:
+        user.context = context
 
-    user.likes = ','.join(likes) if likes else ''
-    user.dislikes = ','.join(dislikes) if dislikes else ''
-    user.context = context
     db.session.commit()
 
     return jsonify({'success': True, 'message': 'Profile updated successfully'}), 200
@@ -170,8 +207,11 @@ def login():
     if not all([identifier, password]):
         return jsonify({'success': False, 'message': 'Missing fields'}), 400
 
+    # Retrieve user by email or username
     user = User.query.filter((User.email == identifier) | (User.username == identifier)).first()
 
+    # NOTE: The original code in app.py had a bug here. I'm assuming the password was intended to be hashed.
+    # The database.py check_password method handles the hash check.
     if user and user.check_password(password):
         session['user_id'] = user.id
         return jsonify({'success': True, 'message': 'Login successful'}), 200
@@ -184,24 +224,166 @@ def logout():
     session.pop('user_id', None)
     return jsonify({'success': True, 'message': 'Logged out successfully'})
 
+# --- CHATBOT & SESSION API ---
 
-# @socketio.on('connect')
-# def handle_connect():
-#     print('Client connected')
+# API to handle chat messages
+@app.route('/api/chat', methods=['POST'])
+@login_required
+def chat_message():
+    data = request.get_json()
+    message_content = data.get('message')
+    conversation_id = data.get('conversation_id')
+    emotion_detected = data.get('emotion_detected') # From the emotion box
 
-# For Video-based emotion-detection module 
+    if not all([message_content, conversation_id]):
+        return jsonify({'success': False, 'message': 'Missing message or conversation ID'}), 400
+
+    conversation = Conversation.query.filter_by(id=conversation_id, user_id=g.user.id).first()
+
+    if not conversation:
+        return jsonify({'success': False, 'message': 'Conversation not found'}), 404
+
+    # 1. Save User Message
+    user_message = Message(
+        conversation_id=conversation_id,
+        sender='user',
+        content=message_content,
+        emotion_detected=emotion_detected
+    )
+    db.session.add(user_message)
+    db.session.commit()
+
+    # 2. Simulate LLM Response (Placeholder)
+    # Use user context/likes/dislikes to generate a slightly personalized placeholder response
+    context_text = g.user.context if g.user.context else "a student"
+    likes_text = f"who likes {g.user.likes}" if g.user.likes else ""
+    
+    # **START OF MODIFIED CODE BLOCK - ENHANCED VTA RESPONSE**
+    llm_response_content = (
+        f"Hello **{g.user.username}**! I've registered your emotion as **{emotion_detected.upper()}**. "
+        f"As you are a **{context_text}** {likes_text}, I can tailor my teaching. "
+        f"Let's focus on your question about: '{message_content}'. "
+        f"Tell me more about what you already know about this topic."
+    )
+    
+    # 3. Save VTA Response
+    vta_message = Message(
+        conversation_id=conversation_id,
+        sender='vta',
+        content=llm_response_content
+    )
+    db.session.add(vta_message)
+    db.session.commit()
+
+    # Simulate streaming delay for a better frontend experience
+    time.sleep(0.5) 
+
+    return jsonify({
+        'success': True, 
+        'vta_response': llm_response_content,
+        'message_id': vta_message.id
+    }), 200
+
+# API to get a list of past/recent study sessions
+@app.route('/api/sessions', methods=['GET'])
+@login_required
+def get_sessions():
+    sessions = Conversation.query.filter_by(user_id=g.user.id).order_by(Conversation.created_at.desc()).limit(10).all()
+    
+    session_list = [{
+        'id': s.id,
+        'title': s.title,
+        'created_at': s.created_at.strftime("%Y-%m-%d %H:%M")
+    } for s in sessions]
+
+    return jsonify({'success': True, 'sessions': session_list}), 200
+
+# API to start a new study session
+@app.route('/api/sessions/new', methods=['POST'])
+@login_required
+def new_session():
+    # Simple title generation. Frontend can also send a title
+    title = f"New Session - {datetime.now().strftime('%b %d, %H:%M')}"
+    
+    new_conversation = Conversation(
+        user_id=g.user.id,
+        title=title
+    )
+    db.session.add(new_conversation)
+    db.session.commit()
+    
+    # Add a welcoming VTA message to start the thread
+    welcome_message = Message(
+        conversation_id=new_conversation.id,
+        sender='vta',
+        content="Welcome! I'm your Emotion-Aware VTA. Let's start a new learning session. How are you feeling today?"
+    )
+    db.session.add(welcome_message)
+    db.session.commit()
+
+    return jsonify({
+        'success': True, 
+        'conversation_id': new_conversation.id,
+        'title': new_conversation.title,
+        'welcome_message': welcome_message.content
+    }), 201
+
+# API to get messages for a specific session
+@app.route('/api/sessions/<int:session_id>/messages', methods=['GET'])
+@login_required
+def get_session_messages(session_id):
+    conversation = Conversation.query.filter_by(id=session_id, user_id=g.user.id).first()
+
+    if not conversation:
+        return jsonify({'success': False, 'message': 'Conversation not found'}), 404
+        
+    messages = Message.query.filter_by(conversation_id=session_id).order_by(Message.timestamp.asc()).all()
+    
+    message_list = [{
+        'id': m.id,
+        'sender': m.sender,
+        'content': m.content,
+        'emotion': m.emotion_detected,
+        'timestamp': m.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+    } for m in messages]
+
+    return jsonify({'success': True, 'messages': message_list, 'title': conversation.title}), 200
+
+
+# --- SOCKETIO (Real-Time Emotion Detection) ---
+
+# For Video-based emotion-detection module (Facial Recognition)
 @socketio.on('video_stream')
 def handle_video_stream(data):
-    print("Received video stream data.")
-    emit('video_response', {'emotion': 'neutral'})
+    # Data is expected to be a video frame/image data from the frontend
+    # Placeholder: In a real app, this data would be fed to an OpenCV/ML model
+    
+    # Simulate a detected emotion
+    # Note: Using random choice for simulation in a real-time stream is common
+    import random
+    emotions = ['Neutral', 'Angry', 'Disgust', 'Fear', 'Happy', 'Boredom', 'Surprise', 'Calm']
+    detected_emotion = random.choice(emotions)
+    # Emit the real-time emotion back to the client that sent the stream
+    emit('video_response', {'emotion': detected_emotion})
 
-# For Voice-based emotion-detection module
+# For Voice-based emotion-detection module (Acoustic/Speech Recognition)
 @socketio.on('audio_stream')
 def handle_audio_stream(data):
-    print("Received audio stream data.")
-    emit('audio_response', {'emotion': 'calm'})
+    # Data is expected to be an audio blob/chunk from the frontend
+    # Placeholder: In a real app, this would be fed to an STT model (Whisper) and an Acoustic ER model
+
+    # Simulate a detected emotion and transcription
+    emotions = ['Neutral', 'Angry', 'Disgust', 'Fear', 'Happy', 'Boredom', 'Surprise', 'Calm']
+    detected_emotion = random.choice(emotions)
+    
+    # Emit the results back to the client
+    emit('audio_response', {
+        'transcription': "This is a placeholder for your transcribed voice message.",
+        'emotion': detected_emotion
+    })
 
 # Main 
 if __name__ == '__main__':
     create_db()
+    # Use socketio.run for Flask-SocketIO apps
     socketio.run(app, debug=True)
