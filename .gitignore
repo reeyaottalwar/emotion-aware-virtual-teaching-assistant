@@ -1,0 +1,14 @@
+echo "emotion-env/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.h5
+*.pb
+*.tflite
+*.so
+*.dll
+*.dylib
+.DS_Store
+*.log
+checkpoints/" > .gitignore

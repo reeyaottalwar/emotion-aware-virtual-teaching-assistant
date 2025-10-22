@@ -1,0 +1,26 @@
+# Python environments
+emotion-env/
+venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Models and binaries
+*.h5
+*.pb
+*.tflite
+*.so
+*.dll
+*.dylib
+
+# System files
+.DS_Store
+
+# Logs and checkpoints
+*.log
+checkpoints/
+
