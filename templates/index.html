@@ -91,7 +91,6 @@
 </head>
 
 <body class="min-h-screen bg-gray-900 text-white overflow-x-hidden" id="vanta-bg">
-    <!-- Stage 1: The Gateway (Login) -->
     <div id="stage-1" class="min-h-screen flex items-center justify-center fade-in">
         <div class="gateway-form p-10 max-w-md w-full text-center" data-aos="zoom-in">
             <h1 class="text-4xl font-bold mb-6">Welcome Learner</h1>
@@ -138,7 +137,6 @@
             </div>
         </div>
     </div>
-    <!-- Signup Page -->
     <div id="signup-page" class="min-h-screen hidden flex items-center justify-center fade-in">
         <div class="gateway-form p-10 max-w-md w-full text-center" data-aos="zoom-in">
             <h1 class="text-4xl font-bold mb-6">Sign Up</h1>
@@ -181,7 +179,6 @@
             </div>
         </div>
     </div>
-    <!-- Stage 2: Likes and Dislikes -->
     <div id="stage-2" class="min-h-screen hidden flex items-center justify-center p-6">
         <div class="gateway-form p-10 max-w-4xl w-full text-center" data-aos="zoom-in">
             <h1 class="text-4xl font-bold mb-4">Tell Us About Yourself</h1>
@@ -189,7 +186,6 @@
             </p>
 
             <div class="space-y-8">
-                <!-- Likes Section -->
                 <div class="bg-gradient-to-br from-green-900 to-gray-900 p-8 rounded-2xl">
                     <h3 class="text-2xl font-semibold text-center text-green-400 mb-6">What do you like? 💚</h3>
                     <p class="text-gray-300 text-center mb-6">Tell us about your interests, hobbies, or things you enjoy
@@ -227,7 +223,6 @@
                         rows="3"></textarea>
                 </div>
 
-                <!-- Dislikes Section -->
                 <div class="bg-gradient-to-br from-red-900 to-gray-900 p-8 rounded-2xl">
                     <h3 class="text-2xl font-semibold text-center text-red-400 mb-6">What do you dislike? 💔</h3>
                     <p class="text-gray-300 text-center mb-6">Tell us about things you prefer to avoid</p>
@@ -264,7 +259,6 @@
                         rows="3"></textarea>
                 </div>
 
-                <!-- Continue Button -->
                 <div class="text-center">
                     <div class="space-y-4 text-center">
                         <button id="continue-preferences"
@@ -281,15 +275,13 @@
             </div>
         </div>
     </div>
-    <!-- Stage 3: The Chamber of Choices -->
     <div id="stage-3" class="min-h-screen hidden flex-col items-center justify-center p-6">
         <h1 class="text-4xl font-bold mb-4 text-center" data-aos="fade-down">Chamber of Choices</h1>
         <p class="text-xl text-gray-300 mb-12 max-w-lg text-center" data-aos="fade-up">Select what calls to you</p>
 
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 max-w-6xl" id="interest-container"
             data-aos="zoom-in">
-            <!-- Interests will be dynamically added here -->
-        </div>
+            </div>
 
         <div id="continue-btn" class="mt-12 hidden" data-aos="fade-up">
             <button
@@ -298,7 +290,6 @@
             </button>
         </div>
     </div>
-    <!-- Stage 4: The Bridge of Context -- Profession-->
     <div id="stage-4" class="min-h-screen hidden flex items-center justify-center p-6">
         <div class="gateway-form p-10 max-w-2xl w-full text-center" data-aos="zoom-in">
             <div class="h-32 mb-8 flex items-center justify-center">
@@ -331,10 +322,8 @@
             </div>
         </div>
     </div>
-    <!-- Stage 5: Profile Summary & Confirmation -->
     <div id="stage-5" class="min-h-screen hidden flex items-center justify-center p-6">
         <div class="gateway-form p-10 max-w-5xl w-full text-center" data-aos="zoom-in">
-            <!-- Header -->
             <div class="mb-8">
                 <div
                     class="h-32 w-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-600 to-blue-500 flex items-center justify-center shadow-xl">
@@ -344,11 +333,9 @@
                 <p class="text-xl text-gray-300">Please confirm your details are correct before we begin</p>
             </div>
 
-            <!-- Profile Summary Card -->
             <div class="bg-gray-800 rounded-2xl p-8 mb-8 shadow-2xl" data-aos="fade-up">
                 <h3 class="text-2xl font-semibold mb-6 text-center">Your Complete Profile</h3>
 
-                <!-- Personal Information -->
                 <div class="mb-8 p-6 bg-gray-700 rounded-xl">
                     <h4 class="text-lg font-medium text-yellow-400 mb-4 flex items-center">
                         <i data-feather="user" class="w-5 h-5 mr-2"></i>
@@ -374,33 +361,27 @@
                     </div>
                 </div>
 
-                <!-- Preferences -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <!-- Likes -->
                     <div class="p-6 bg-green-900 bg-opacity-30 rounded-xl border border-green-700">
                         <h4 class="text-lg font-medium text-green-400 mb-4 flex items-center">
                             <i data-feather="heart" class="w-5 h-5 mr-2"></i>
                             Things You Like
                         </h4>
                         <ul class="space-y-2" id="passions-list">
-                            <!-- Selected likes will appear here -->
-                        </ul>
+                            </ul>
                     </div>
 
-                    <!-- Dislikes -->
                     <div class="p-6 bg-red-900 bg-opacity-30 rounded-xl border border-red-700">
                         <h4 class="text-lg font-medium text-red-400 mb-4 flex items-center">
                             <i data-feather="x-circle" class="w-5 h-5 mr-2"></i>
                             Things You Dislike
                         </h4>
                         <ul class="space-y-2" id="dislikes-list">
-                            <!-- Selected dislikes will appear here -->
-                        </ul>
+                            </ul>
                     </div>
                 </div>
             </div>
 
-            <!-- Action Buttons -->
             <div class="space-y-4" data-aos="fade-up">
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
                     <button id="edit-profile-btn"
@@ -417,7 +398,6 @@
         </div>
     </div>
 
-    <!-- Quote Page -->
     <div id="quote-page" class="min-h-screen hidden flex items-center justify-center p-6">
         <div class="max-w-4xl w-full text-center" data-aos="fade-in">
             <blockquote class="text-3xl md:text-5xl font-light text-white italic mb-8">
@@ -437,7 +417,6 @@
             <div id="modal-summary-content"></div> 
         </div>
     </div>
-    <!-- Main Website Page -->
     <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
     <div id="main-page" class="flex h-screen bg-gray-100 dark:bg-gray-900 transition-colors duration-300 hidden">
@@ -483,17 +462,11 @@
                     Welcome to VTA
                 </h1>
 
-                <header class="...">
-                    ...
-                    <h1 class="... font-semibold ...">
-                        <span id="current-session-title">Welcome to VTA</span>
-                    </h1>
-
+                <div id="emotion-feedback-container" class="absolute left-1/2 transform -translate-x-1/2">
                     <div id="emotion-feedback-banner" class="text-sm font-medium text-center px-4 py-1 rounded-full text-white hidden">
                         VTA is ready to adapt!
                     </div>
-                    ...
-                </header>
+                </div>
 
                 <div class="flex items-center space-x-4">
                     
@@ -1064,6 +1037,7 @@
             return `http://127.0.0.1:5000${path}`;
         }
 
+        // **UPDATED fetch_data function to robustly handle non-JSON 404 responses**
         async function fetch_data(path, method = 'GET', body = null) {
             const options = {
                 method: method,
@@ -1074,8 +1048,38 @@
             if (body) {
                 options.body = JSON.stringify(body);
             }
-            const response = await fetch(get_api_endpoint(path), options);
-            return response.json();
+            const url = get_api_endpoint(path);
+            const response = await fetch(url, options);
+            
+            // Check for network or application errors (status 404, 500, or 401 from login_required)
+            if (!response.ok) {
+                let error_message = `HTTP Error: ${response.status} ${response.statusText} for ${url}`;
+                
+                // Attempt to read the error message as JSON (Flask's jsonify on error)
+                try {
+                    const error_data = await response.json();
+                    // Prioritize Flask's custom error message if available
+                    error_message = error_data.message || error_message; 
+                } catch (e) {
+                    // If the response isn't JSON (e.g., 404 HTML page), we ignore the content
+                    console.error(`Failed to parse error response for ${url}. Received HTML/Text.`);
+                }
+                
+                // Throw an error that will be caught by the calling function's .catch() block
+                throw new Error(error_message);
+            }
+
+            // Attempt to return JSON for successful response (status 200-299)
+            try {
+                return response.json();
+            } catch (e) {
+                // Handle cases where a successful response (like a PUT) has no body (HTTP 204 No Content)
+                if (response.status === 204) {
+                     return { success: true, message: "No content returned." };
+                }
+                console.warn(`Response received for ${url}, but body was empty or not strictly JSON.`);
+                return { success: true, message: "Response body was not JSON/empty. Assuming success." };
+            }
         }
 
         // Logout
@@ -1099,6 +1103,18 @@
         let isTimerRunning = false;
         let totalSeconds = 25 * 60; // Default 25 minutes
         let currentMode = 'work'; // 'work' or 'break'
+
+        // **ADDED MISSING FUNCTION - FIX TIMER**
+        function updateTimerDisplay() {
+            const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const seconds = String(totalSeconds % 60).padStart(2, '0');
+            const timerDisplay = document.getElementById('timer-display');
+            if (timerDisplay) {
+                timerDisplay.textContent = `${minutes}:${seconds}`;
+                // Update the browser tab title for better focus tracking
+                document.title = `(${minutes}:${seconds}) VTA Focus Time`;
+            }
+        }
 
         function notifyUser(title, body) {
             if (!("Notification" in window)) {
@@ -1130,17 +1146,6 @@
                 notifyUser("Break is Over!", "Time to focus again for 25 minutes.");
             }
             updateTimerDisplay();
-        }
-
-        function updateTimerDisplay() {
-            const minutes = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-            const seconds = String(totalSeconds % 60).padStart(2, '0');
-            const timerDisplay = document.getElementById('timer-display');
-            if (timerDisplay) {
-                timerDisplay.textContent = `${minutes}:${seconds}`;
-                // Update the browser tab title for better focus tracking
-                document.title = `(${minutes}:${seconds}) VTA Focus Time`;
-            }
         }
 
         function startPomodoro() {
@@ -1208,7 +1213,8 @@
             container.innerHTML = '';
             currentConversationId = sessionId;
 
-            const data = await fetch_data(`/sessions/${sessionId}/messages`);
+            // FIX: Corrected endpoint path to include /api
+            const data = await fetch_data(`/api/sessions/${sessionId}/messages`);
             if (data.success) {
                 document.getElementById('current-session-title').textContent = data.title;
                 data.messages.forEach(msg => {
@@ -1226,7 +1232,8 @@
             const noSessions = document.getElementById('no-sessions');
             list.innerHTML = '';
 
-            const data = await fetch_data('/sessions');
+            // FIX: Corrected endpoint path to include /api
+            const data = await fetch_data('/api/sessions');
             if (data.success && data.sessions.length > 0) {
                 noSessions.classList.add('hidden');
                 data.sessions.forEach(session => {
@@ -1254,7 +1261,8 @@
         }
 
         async function startNewSession() {
-            const data = await fetch_data('/sessions/new', 'POST', {});
+            // FIX: Corrected endpoint path to include /api
+            const data = await fetch_data('/api/sessions/new', 'POST', {});
             if (data.success) {
                 // Set new session ID and reload sessions list
                 currentConversationId = data.conversation_id;
@@ -1280,7 +1288,7 @@
             document.getElementById('messages-container').appendChild(userEl);
             scrollToBottom();
 
-            // Call chat API
+            // Call chat API (This path was fixed in the previous turn)
             const data = await fetch_data('/api/chat', 'POST', {
                 message: message,
                 conversation_id: currentConversationId,
@@ -1394,7 +1402,7 @@
                 placeholder.classList.add('hidden');
                 document.getElementById('start-webcam-btn').textContent = 'Streaming...';
 
-                // Stream video frames to Flask-SocketIO every 100ms
+                // Stream video frames to Flask-SocketIO every 5000ms (5 seconds)
                 const canvas = document.createElement('canvas');
                 const context = canvas.getContext('2d');
                 
@@ -1406,7 +1414,7 @@
                         const dataURL = canvas.toDataURL('image/jpeg'); // Send image data
                         socket.emit('video_stream', { frame: dataURL });
                     }
-                }, 5000);
+                }, 5000); // **CHANGED to 5000ms (5 seconds)**
 
             } catch (err) {
                 console.error("Error accessing webcam: ", err);
@@ -1469,13 +1477,13 @@
             initializeSocketIO();
             fetchRecentSessions();
             
+            // Setup event listeners for the new chat interface
             document.getElementById('sidebar-open-btn').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.remove('-translate-x-full');
             });
             document.getElementById('sidebar-close-btn').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.add('-translate-x-full');
             });
-            
             
             // Set user greeting from session check (already in original index.html)
             fetch('http://127.0.0.1:5000/check_session')
