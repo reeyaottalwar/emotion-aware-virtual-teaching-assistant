@@ -1,11 +1,11 @@
 import os
-import uuid
-from typing import Dict, List, Any
+from typing import Dict, Any
 from dotenv import load_dotenv
 from langchain_community.chat_message_histories import ChatMessageHistory
-from langchain_core.messages import SystemMessage, HumanMessage, AIMessage, MessagesPlaceholder
+from langchain_core.messages import SystemMessage
 from langchain_core.output_parsers import StrOutputParser
-from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.runnables.history import RunnableWithMessageHistory
 from langchain_groq import ChatGroq
 
 # Load environment variables (needed to ensure GROQ_API_KEY is available)
