@@ -7,6 +7,7 @@ from dotenv import load_dotenv
 from database import db, User, Conversation, Message
 from werkzeug.security import check_password_hash
 from datetime import datetime
+from groqChatbot import llm_chatbot
 import time # For simulating LLM response time
 
 # Set this environment variable for local testing with HTTP
@@ -243,7 +244,7 @@ def chat_message():
     if not conversation:
         return jsonify({'success': False, 'message': 'Conversation not found'}), 404
 
-    # 1. Save User Message
+    # 1. Save User Message (
     user_message = Message(
         conversation_id=conversation_id,
         sender='user',
@@ -253,20 +254,23 @@ def chat_message():
     db.session.add(user_message)
     db.session.commit()
 
-    # 2. Simulate LLM Response (Placeholder)
-    # Use user context/likes/dislikes to generate a slightly personalized placeholder response
-    context_text = g.user.context if g.user.context else "a student"
-    likes_text = f"who likes {g.user.likes}" if g.user.likes else ""
+    # 2. Generate LLM Response using the Groq Chatbot (Minimal change here)
+    user_data = {
+        'username': g.user.username,
+        'context': g.user.context,
+        'likes': g.user.likes,
+        'dislikes': g.user.dislikes,
+        'emotion_detected': emotion_detected
+    }
     
-    # **START OF MODIFIED CODE BLOCK - ENHANCED VTA RESPONSE**
-    llm_response_content = (
-        f"Hello **{g.user.username}**! I've registered your emotion as **{emotion_detected.upper()}**. "
-        f"As you are a **{context_text}** {likes_text}, I can tailor my teaching. "
-        f"Let's focus on your question about: '{message_content}'. "
-        f"Tell me more about what you already know about this topic."
+    # *** Minimal change: Single function call replaces multiple lines of hardcoded logic ***
+    llm_response_content = llm_chatbot.get_response(
+        conversation_id=conversation_id,
+        user_message=message_content, 
+        user_data=user_data
     )
     
-    # 3. Save VTA Response
+    # 3. Save VTA Response 
     vta_message = Message(
         conversation_id=conversation_id,
         sender='vta',
