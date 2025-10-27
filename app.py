@@ -8,6 +8,7 @@ from database import db, User, Conversation, Message
 from werkzeug.security import check_password_hash
 from datetime import datetime
 from groqChatbot import llm_chatbot
+from VoiceAnalysis.speechAnalyzer import analyze_audio_blob
 import time # For simulating LLM response time
 
 # Set this environment variable for local testing with HTTP
@@ -373,17 +374,19 @@ def handle_video_stream(data):
 # For Voice-based emotion-detection module (Acoustic/Speech Recognition)
 @socketio.on('audio_stream')
 def handle_audio_stream(data):
-    # Data is expected to be an audio blob/chunk from the frontend
-    # Placeholder: In a real app, this would be fed to an STT model (Whisper) and an Acoustic ER model
+    audio_blob = data.get('audio')
+    # 1. Use the SER analyzer
+    try:
+        # Pass the audio blob directly to the analyzer
+        results = analyze_audio_blob(audio_blob)
+    except Exception as e:
+        print(f"Audio analysis failed: {e}")
+        results = {'transcription': 'Error processing audio.', 'emotion': 'Neutral'}
 
-    # Simulate a detected emotion and transcription
-    emotions = ['Neutral', 'Angry', 'Disgust', 'Fear', 'Happy', 'Boredom', 'Surprise', 'Calm']
-    detected_emotion = random.choice(emotions)
-    
-    # Emit the results back to the client
+    # 2. Emit the results back to the client (to populate the input box)
     emit('audio_response', {
-        'transcription': "This is a placeholder for your transcribed voice message.",
-        'emotion': detected_emotion
+        'transcription': results['transcription'],
+        'emotion': results['emotion']
     })
 
 # Main 
