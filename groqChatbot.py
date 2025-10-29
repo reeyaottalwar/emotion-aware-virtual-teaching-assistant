@@ -16,7 +16,7 @@ MAX_HISTORY_MESSAGES = 10
 class LLM_Chatbot:
     def __init__(self):
         # Initialize Groq LLM 
-        self.llm = ChatGroq(model=os.environ.get("GROQ_MODEL", "mixtral-8x7b-8096"), temperature=0.7)
+        self.llm = ChatGroq(model=os.environ.get("GROQ_MODEL", "llama-3.3-70b-versatile"), temperature=0.7)
         self.chain = self._build_chain()
         # In-memory history store, keyed by conversation_id
         self.history_store: Dict[str, ChatMessageHistory] = {}

@@ -1,15 +1,19 @@
+import time 
+import os
 from flask import Flask, jsonify, request, session, redirect, url_for, render_template, g 
 from flask_socketio import SocketIO, emit
 from flask_dance.contrib.google import make_google_blueprint, google
 from flask_dance.contrib.github import make_github_blueprint, github
-import os
 from dotenv import load_dotenv
 from database import db, User, Conversation, Message
 from werkzeug.security import check_password_hash
 from datetime import datetime
-from groqChatbot import llm_chatbot
-from VoiceAnalysis.speechAnalyzer import analyze_audio_blob
-import time # For simulating LLM response time
+
+# --- EXTERNAL MODULE IMPORTS ---
+# Ensure GroqChatbot.py and SpeechAnalyzer.py are in the same directory as app.py
+from groqChatbot import llm_chatbot 
+from VoiceAnalysis.speechAnalyzer import analyze_audio_blob 
+# ---
 
 # Set this environment variable for local testing with HTTP
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'
@@ -30,7 +34,7 @@ db.init_app(app)
 
 # Wrap Flask app with SocketIO - CORS enabled
 # Using eventlet for asynchronous support for real-time video/audio streams
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='gevent')
+socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
 
 # Function to create database tables
 def create_db():
@@ -245,7 +249,7 @@ def chat_message():
     if not conversation:
         return jsonify({'success': False, 'message': 'Conversation not found'}), 404
 
-    # 1. Save User Message (
+    # 1. Save User Message
     user_message = Message(
         conversation_id=conversation_id,
         sender='user',
@@ -255,23 +259,40 @@ def chat_message():
     db.session.add(user_message)
     db.session.commit()
 
-    # 2. Generate LLM Response using the Groq Chatbot (Minimal change here)
+    # 2. Call LLM API (Integrated Groq/LangChain)
+    context_text = g.user.context if g.user.context else "a student"
+    likes_text = g.user.likes if g.user.likes else ""
+    llm_response_content = None # Initialize as None
+
     user_data = {
         'username': g.user.username,
-        'context': g.user.context,
-        'likes': g.user.likes,
-        'dislikes': g.user.dislikes,
+        'context': context_text,
+        'likes': likes_text,
         'emotion_detected': emotion_detected
     }
+
+    try:
+        # **CALLING GROQ CHATBOT**
+        llm_response_content = llm_chatbot.get_response(
+            conversation_id, 
+            message_content, 
+            user_data
+        )
+    except Exception as e:
+        # This catches global execution errors. Groq API errors are handled internally by the chatbot class.
+        print(f"Global Chatbot Execution Failed: {e}. Falling back to generic response.")
+        llm_response_content = None 
+
+    # **START OF LLM FALLBACK LOGIC**
+    # The VTA should attempt a final response even if the LLM fails.
+    if not llm_response_content or llm_response_content.isspace() or 'I apologize, ' in llm_response_content:
+        # This is the verbose fallback when the Groq API fails.
+        llm_response_content = (
+            f"It seems like we're experiencing a technical issue. Don't worry, let's try to resolve this together. The error message is indicating a problem with the LLM API configuration or connectivity. I'm here to help you navigate through any challenges that come up. How would you like to proceed?"
+        )
+    # **END OF LLM FALLBACK LOGIC**
     
-    # *** Minimal change: Single function call replaces multiple lines of hardcoded logic ***
-    llm_response_content = llm_chatbot.get_response(
-        conversation_id=conversation_id,
-        user_message=message_content, 
-        user_data=user_data
-    )
-    
-    # 3. Save VTA Response 
+    # 3. Save VTA Response
     vta_message = Message(
         conversation_id=conversation_id,
         sender='vta',
@@ -280,13 +301,33 @@ def chat_message():
     db.session.add(vta_message)
     db.session.commit()
 
-    # Simulate streaming delay for a better frontend experience
-    time.sleep(0.5) 
+    # NOTE: REMOVED time.sleep(0.5) to enable immediate frontend streaming
 
     return jsonify({
         'success': True, 
         'vta_response': llm_response_content,
         'message_id': vta_message.id
+    }), 200
+
+# API to retrieve full user profile data
+@app.route('/api/profile', methods=['GET'])
+@login_required
+def get_profile():
+    user = g.user
+    
+    # We must convert the comma-separated strings back to lists for the frontend
+    likes_list = user.likes.split(',') if user.likes else []
+    dislikes_list = user.dislikes.split(',') if user.dislikes else []
+
+    return jsonify({
+        'success': True,
+        'user_id': user.id,
+        'name': user.name,
+        'username': user.username,
+        'email': user.email,
+        'likes': likes_list,
+        'dislikes': dislikes_list,
+        'context': user.context,
     }), 200
 
 # API to get a list of past/recent study sessions
@@ -364,24 +405,39 @@ def handle_video_stream(data):
     # Placeholder: In a real app, this data would be fed to an OpenCV/ML model
     
     # Simulate a detected emotion
-    # Note: Using random choice for simulation in a real-time stream is common
     import random
     emotions = ['Neutral', 'Angry', 'Disgust', 'Fear', 'Happy', 'Boredom', 'Surprise', 'Calm']
     detected_emotion = random.choice(emotions)
     # Emit the real-time emotion back to the client that sent the stream
     emit('video_response', {'emotion': detected_emotion})
 
+
 # For Voice-based emotion-detection module (Acoustic/Speech Recognition)
 @socketio.on('audio_stream')
 def handle_audio_stream(data):
-    audio_blob = data.get('audio')
-    # 1. Use the SER analyzer
+    # Data sent from the frontend is the binary audio Blob
+    audio_blob = data.get('audio') 
+    
+    results = {}
+    
+    # 1. Use the SER analyzer (Adapted from user's analyze_audio_blob logic)
     try:
-        # Pass the audio blob directly to the analyzer
-        results = analyze_audio_blob(audio_blob)
+        # **CALLING EXTERNAL SPEECH ANALYZER MODULE**
+        results = analyze_audio_blob(audio_blob) 
+
+    except FileNotFoundError:
+        # FFmpeg not found on PATH
+        results = {
+            'transcription': "Error: FFmpeg not found on PATH. Audio decoding failed.", 
+            'emotion': 'Alert'
+        }
     except Exception as e:
+        # Catch any other decoding/processing failure
         print(f"Audio analysis failed: {e}")
-        results = {'transcription': 'Error processing audio.', 'emotion': 'Neutral'}
+        results = {
+            'transcription': 'Audio input error. Please check your microphone.', 
+            'emotion': 'Neutral'
+        }
 
     # 2. Emit the results back to the client (to populate the input box)
     emit('audio_response', {
@@ -389,8 +445,9 @@ def handle_audio_stream(data):
         'emotion': results['emotion']
     })
 
+
 # Main 
 if __name__ == '__main__':
     create_db()
     # Use socketio.run for Flask-SocketIO apps
-    socketio.run(app, debug=True)
+    socketio.run(app, debug=True, allow_unsafe_werkzeug=True)

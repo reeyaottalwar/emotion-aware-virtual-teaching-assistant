@@ -446,6 +446,32 @@
                 <p id="no-sessions" class="text-center text-sm text-gray-500 p-4 hidden">No recent sessions.</p>
             </nav>
 
+            <div id="combined-emotion-panel" class="p-3 bg-gray-900 border-t border-gray-700 space-y-4">
+                
+                <div id="emotion-awareness-box" class="p-3 bg-gray-800 rounded-lg shadow-md border border-gray-700 text-center">
+                    <h3 class="text-xs font-semibold text-gray-300 mb-2 border-b border-gray-700 pb-1">Facial Emotion</h3>
+                    
+                    <div class="h-12 w-12 mx-auto rounded-full bg-gray-700 flex items-center justify-center mb-2">
+                        <i data-feather="video-off" class="w-6 h-6 text-gray-500" id="webcam-icon"></i>
+                    </div>
+                    <video id="webcam-feed" autoplay class="hidden h-12 w-12 mx-auto rounded-full object-cover mb-2"></video>
+                    
+                    <p id="detected-emotion" class="text-sm font-bold text-green-400">Neutral</p>
+                    <button id="start-webcam-btn" class="mt-1 text-xs text-blue-400 hover:underline">Start Webcam</button>
+                </div>
+
+                <div id="voice-emotion-box" class="p-3 bg-gray-800 rounded-lg shadow-md border border-gray-700 text-center">
+                    <h3 class="text-xs font-semibold text-gray-300 mb-2 border-b border-gray-700 pb-1">Voice Emotion</h3>
+                    
+                    <div class="h-12 w-12 mx-auto mb-2 flex items-center justify-center">
+                        <i data-feather="volume-2" id="voice-icon" class="w-6 h-6 text-gray-500"></i>
+                    </div>
+                    
+                    <p id="detected-voice-emotion" class="text-sm font-bold text-gray-400">No Audio Yet</p>
+                    <p id="voice-status" class="text-xs text-gray-500 mt-1">Ready to listen...</p>
+                </div>
+
+            </div>
             <div class="p-4 border-t border-gray-700 text-sm">
                 <a href="#" class="block text-gray-400 hover:text-white transition-colors" onclick="logout()">
                     <i data-feather="log-out" class="w-4 h-4 mr-2 inline"></i> Logout
@@ -458,6 +484,7 @@
                 <button id="sidebar-open-btn" class="text-gray-900 dark:text-white md:hidden p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-700">
                     <i data-feather="menu" class="w-6 h-6"></i>
                 </button>
+                
                 <h1 class="text-xl font-semibold text-gray-900 dark:text-white" id="current-session-title">
                     Welcome to VTA
                 </h1>
@@ -467,7 +494,7 @@
                         VTA is ready to adapt!
                     </div>
                 </div>
-
+                
                 <div class="flex items-center space-x-4">
                     
                     <div id="pomodoro-timer" class="flex items-center space-x-2 p-2 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-300 cursor-pointer" title="Pomodoro Focus Timer">
@@ -493,19 +520,6 @@
                     <div id="modal-summary-content"></div> 
                 </div>
             </div>
-
-            <div id="emotion-awareness-box" class="fixed right-4 top-20 z-40 p-3 bg-white dark:bg-gray-700 rounded-xl shadow-xl border border-gray-200 dark:border-gray-600 w-48 text-center transition-colors duration-300">
-                <h3 class="text-sm font-semibold mb-2 text-gray-900 dark:text-gray-100">Live Emotion</h3>
-                
-                <div id="webcam-placeholder" class="bg-gray-200 dark:bg-gray-600 h-16 w-16 mx-auto rounded-full flex items-center justify-center mb-2">
-                    <i data-feather="video-off" class="w-8 h-8 text-gray-500"></i>
-                </div>
-                <video id="webcam-feed" autoplay class="hidden h-16 w-16 mx-auto rounded-full object-cover mb-2"></video>
-                
-                <p id="detected-emotion" class="text-lg font-bold text-green-600 dark:text-green-400">Neutral</p>
-                <button id="start-webcam-btn" class="mt-2 text-xs text-blue-500 hover:underline">Start Webcam</button>
-            </div>
-
             <div id="chat-area" class="flex-grow overflow-y-auto p-6 pb-24 space-y-4">
                 <div id="messages-container" class="max-w-4xl mx-auto">
                     <div class="flex justify-start">
@@ -1193,7 +1207,7 @@
             const textColor = isVTA ? 'text-blue-900 dark:text-blue-100' : 'text-green-900 dark:text-green-100';
 
             const messageDiv = document.createElement('div');
-            messageDiv.className = `flex ${align}`;
+            messageDiv.className = `flex ${align} mb-4`; 
             messageDiv.innerHTML = `
                 <div class="${bgColor} p-3 rounded-xl max-w-lg text-sm shadow">
                     <p class="${textColor}">${content}</p>
@@ -1224,6 +1238,32 @@
                 scrollToBottom();
             } else {
                 console.error('Failed to load session:', data.message);
+            }
+        }
+
+        async function loadUserProfileData() {
+            try {
+                const data = await fetch_data('/api/profile', 'GET');
+                if (data.success) {
+                    // 1. Store data globally for use by VTA/Summary Modal
+                    window.userPreferences = {
+                        likes: data.likes,
+                        dislikes: data.dislikes
+                    };
+                    window.userContext = data.context;
+
+                    // 2. Populate the summary modal data fields immediately
+                    document.getElementById('summary-name').textContent = data.name;
+                    document.getElementById('summary-username').textContent = data.username;
+                    document.getElementById('summary-email').textContent = data.email;
+                    
+                    // NOTE: The populateProfileSummary() function will now be able to 
+                    // read from window.userPreferences and window.userContext.
+                } else {
+                    console.warn("Failed to retrieve profile preferences:", data.message);
+                }
+            } catch (error) {
+                console.error("Error fetching profile data:", error);
             }
         }
 
@@ -1288,6 +1328,13 @@
             document.getElementById('messages-container').appendChild(userEl);
             scrollToBottom();
 
+            // VTA "..." Confirmation
+            const loadingEl = createMessageElement('vta', '...');
+            loadingEl.id = 'vta-loading-indicator';
+            document.getElementById('messages-container').appendChild(loadingEl);
+            scrollToBottom();
+
+
             // Call chat API (This path was fixed in the previous turn)
             const data = await fetch_data('/api/chat', 'POST', {
                 message: message,
@@ -1295,9 +1342,15 @@
                 emotion_detected: currentEmotion 
             });
 
+            // Remove the loading indicator once data is received
+            document.getElementById('vta-loading-indicator')?.remove();
+
+
             if (data.success) {
                 // Simulate text streaming effect for VTA response
                 const vtaMessage = data.vta_response;
+                // ... (rest of the streaming logic remains the same)
+                // ... (use the original streaming logic provided earlier)
                 const vtaEl = createMessageElement('vta', '', 'VTA'); // Placeholder element
                 document.getElementById('messages-container').appendChild(vtaEl);
 
@@ -1372,11 +1425,56 @@
             // Listener for audio response (transcription + voice emotion)
             socket.on('audio_response', (data) => {
                 const inputField = document.getElementById('user-input');
-                inputField.value = data.transcription || '';
-                console.log(`Voice Emotion: ${data.emotion}`);
-                // Can optionally set the currentEmotion to the voice emotion here
-                // currentEmotion = data.emotion;
-                // If transcribed, the user can then hit send to submit the text message
+                const voiceEmotionDisplay = document.getElementById('detected-voice-emotion');
+                const voiceStatus = document.getElementById('voice-status');
+                
+                const transcribedText = data.transcription || '';
+                const detectedVoiceEmotion = data.emotion || 'Neutral';
+                
+                // 1. Update the dedicated voice emotion display
+                voiceEmotionDisplay.textContent = detectedVoiceEmotion.toUpperCase();
+                
+                if (detectedVoiceEmotion === 'Alert' || detectedVoiceEmotion === 'Failure' || transcribedText.includes('Error')) {
+                    voiceEmotionDisplay.className = 'text-lg font-bold text-red-600 dark:text-red-400';
+                    voiceStatus.textContent = transcribedText.split(':')[0] || 'Processing Error';
+                } else {
+                    // Update color based on emotion (simple positive/negative)
+                    let emotionColor = 'text-gray-500 dark:text-gray-400';
+                    if (detectedVoiceEmotion === 'Happy' || detectedVoiceEmotion === 'Excited' || detectedVoiceEmotion === 'Concentration') {
+                        emotionColor = 'text-green-600 dark:text-green-400';
+                    } else if (detectedVoiceEmotion === 'Sad' || detectedVoiceEmotion === 'Angry' || detectedVoiceEmotion === 'Frustration') {
+                         emotionColor = 'text-yellow-600 dark:text-yellow-400';
+                    }
+                    voiceEmotionDisplay.className = `text-lg font-bold ${emotionColor}`;
+                    voiceStatus.textContent = `Analyzed: ${detectedVoiceEmotion}`;
+                }
+
+                // 2. Display the transcription in the input box
+                inputField.value = transcribedText;
+                
+                // 3. Set the current emotion for the next API call
+                currentEmotion = detectedVoiceEmotion;
+                
+                // 4. Automatically send the message (Only if not a known error/placeholder)
+                if (transcribedText.length > 5 && !transcribedText.includes("Error") && !transcribedText.includes("placeholder")) {
+                    sendMessage(transcribedText); 
+                } else if (transcribedText.includes("placeholder")) {
+                    console.log("Voice analyzed successfully, waiting for user to confirm/edit transcription.");
+                }
+
+                console.log(`Voice Emotion Detected: ${detectedVoiceEmotion}`);
+            });
+
+            // Add handler for mic-toggle-btn start state to show 'Listening'
+            document.getElementById('mic-toggle-btn').addEventListener('click', () => {
+                const micBtn = document.getElementById('mic-toggle-btn');
+                const isRecording = micBtn.classList.contains('animate-pulse');
+
+                if (isRecording) {
+                    document.getElementById('voice-status').textContent = 'Listening...';
+                } else {
+                     document.getElementById('voice-status').textContent = 'Ready to listen...';
+                }
             });
         }
         // Profile icon
@@ -1395,11 +1493,11 @@
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: true });
                 const videoElement = document.getElementById('webcam-feed');
-                const placeholder = document.getElementById('webcam-placeholder');
+                const webcamIcon = document.getElementById('webcam-icon');
                 
                 videoElement.srcObject = stream;
                 videoElement.classList.remove('hidden');
-                placeholder.classList.add('hidden');
+                webcamIcon.classList.add('hidden');
                 document.getElementById('start-webcam-btn').textContent = 'Streaming...';
 
                 // Stream video frames to Flask-SocketIO every 5000ms (5 seconds)
@@ -1434,7 +1532,8 @@
                     micBtn.classList.replace('bg-red-500', 'bg-red-700');
                     micBtn.classList.add('animate-pulse');
                     
-                    mediaRecorder = new MediaRecorder(stream);
+                    // Reverted to universally supported audio/webm format
+                    mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
                     let audioChunks = [];
 
                     mediaRecorder.ondataavailable = event => {
@@ -1442,12 +1541,12 @@
                     };
 
                     mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { 'type' : 'audio/wav' }); // or 'audio/webm'
-                        console.log('Sending audio blob to server...');
-                        // Send the audio blob data to the backend for processing
-                        // Note: Actual streaming of a large blob needs proper handling. 
-                        // For a prototype, sending the full blob on stop is simpler.
-                        socket.emit('audio_stream', { audio: audioBlob }); 
+                        const audioBlob = new Blob(audioChunks, { 'type' : 'audio/webm' });
+                        console.log('Sending audio blob directly to server for processing.');
+                        
+                        socket.emit('audio_stream', { 
+                            audio: audioBlob
+                        }); 
                         
                         audioChunks = [];
                         micBtn.classList.replace('bg-red-700', 'bg-red-500');
@@ -1475,8 +1574,10 @@
         function initializeVTA() {
             feather.replace();
             initializeSocketIO();
+            loadUserProfileData(); 
             fetchRecentSessions();
-            
+
+
             // Setup event listeners for the new chat interface
             document.getElementById('sidebar-open-btn').addEventListener('click', () => {
                 document.getElementById('sidebar').classList.remove('-translate-x-full');
