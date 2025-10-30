@@ -10,9 +10,9 @@ from werkzeug.security import check_password_hash
 from datetime import datetime
 
 # --- EXTERNAL MODULE IMPORTS ---
-# Ensure GroqChatbot.py and SpeechAnalyzer.py are in the same directory as app.py
 from groqChatbot import llm_chatbot 
 from VoiceAnalysis.speechAnalyzer import analyze_audio_blob 
+from VideoAnalysis.VideoAnalyzer import analyze_video_frame
 # ---
 
 # Set this environment variable for local testing with HTTP
@@ -268,7 +268,8 @@ def chat_message():
         'username': g.user.username,
         'context': context_text,
         'likes': likes_text,
-        'emotion_detected': emotion_detected
+        'voice_emotion': emotion_detected, 
+        'facial_emotion': emotion_detected
     }
 
     try:
@@ -401,14 +402,15 @@ def get_session_messages(session_id):
 # For Video-based emotion-detection module (Facial Recognition)
 @socketio.on('video_stream')
 def handle_video_stream(data):
-    # Data is expected to be a video frame/image data from the frontend
-    # Placeholder: In a real app, this data would be fed to an OpenCV/ML model
+    base64_frame = data.get('frame')
     
-    # Simulate a detected emotion
-    import random
-    emotions = ['Neutral', 'Angry', 'Disgust', 'Fear', 'Happy', 'Boredom', 'Surprise', 'Calm']
-    detected_emotion = random.choice(emotions)
-    # Emit the real-time emotion back to the client that sent the stream
+    if base64_frame:
+        # Call the external analysis function
+        detected_emotion = analyze_video_frame(base64_frame)
+    else:
+        detected_emotion = 'Neutral'
+        
+    # Emit the real-time emotion back to the client
     emit('video_response', {'emotion': detected_emotion})
 
 

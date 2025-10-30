@@ -25,16 +25,38 @@ class LLM_Chatbot:
             print("WARNING: GROQ_API_KEY not found. Using generic fallback.")
 
     def _generate_system_prompt(self, user_data: Dict[str, Any]) -> str:
-        """Generates the personalized, emotion-aware system prompt."""
-        emotion = user_data.get('emotion_detected', 'Neutral')
+        """Generates the personalized, emotion-aware system prompt, using both voice and facial input."""
+        
+        # NOTE: app.py must send these two distinct keys.
+        voice_emotion = user_data.get('voice_emotion', 'Neutral')
+        facial_emotion = user_data.get('facial_emotion', 'Neutral')
         context = user_data.get('context', 'a student')
         likes = user_data.get('likes', 'learning')
+
+        # Logic to determine the primary emotional focus for adaptation
+        if voice_emotion.upper() == facial_emotion.upper() and voice_emotion.upper() != 'NEUTRAL':
+             # Both signals agree (High conviction)
+             current_state = f"The student shows high conviction: **{voice_emotion.upper()}** (Voice and Face agree)."
+             adaptation_focus = voice_emotion
+        elif voice_emotion.upper() != 'NEUTRAL' and facial_emotion.upper() != 'NEUTRAL':
+             # Conflict detected: e.g., Voice: Happy, Face: Sad
+             current_state = f"The student is showing CONFLICT: Voice is {voice_emotion.upper()}, Face is {facial_emotion.upper()}."
+             adaptation_focus = "Confusion" # Prioritize a supportive/cautious tone for conflicting signals
+        elif voice_emotion.upper() != 'NEUTRAL':
+             current_state = f"The student's primary emotion is detected via Voice: {voice_emotion.upper()}."
+             adaptation_focus = voice_emotion
+        elif facial_emotion.upper() != 'NEUTRAL':
+             current_state = f"The student's primary emotion is detected via Face: {facial_emotion.upper()}."
+             adaptation_focus = facial_emotion
+        else:
+             current_state = "The student is currently Neutral."
+             adaptation_focus = 'Neutral'
 
         system_prompt = (
             f"You are the Emotion-Aware Virtual Teaching Assistant (VTA). Your primary role is educational. "
             f"The student's profile is: Context='{context}', Likes='{likes}'. "
-            f"The student's current emotional state is **{emotion.upper()}**. "
-            f"Adapt your tone based on the emotion: If {emotion} is Confused/Fear, be encouraging; if Boredom, be engaging. "
+            f"**{current_state}** "
+            f"Adapt your tone based on the current emotional focus: If {adaptation_focus} is Sad, Angry, or Confusion, be encouraging and simplify the explanation. If {adaptation_focus} is Boredom, be more engaging and suggest a real-world example. If {adaptation_focus} is Happy, maintain a positive and stimulating tone. "
             f"Keep your response concise and focused on the learning material (max 3-4 paragraphs)."
         )
         return system_prompt
