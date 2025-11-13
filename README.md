@@ -62,7 +62,7 @@ You will need to have **Python 3.x** and **Git** installed on your system.
 To run the application, use the following command from the project's root directory:
 
 ```bash
-python main.py
+python app.py
 ```
 
 -----
