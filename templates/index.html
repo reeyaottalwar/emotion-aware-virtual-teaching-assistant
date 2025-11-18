@@ -11,6 +11,7 @@
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
     <style>
@@ -88,7 +89,7 @@
                 opacity: 1;
             }
         }
-        
+
         /* ADDED: Styles for the TTS Button */
         .tts-button {
             background: none;
@@ -105,6 +106,20 @@
 
         .tts-button:hover {
             color: #388E3C;
+        }
+
+        /* NEW: Ensure Markdown content is displayed correctly */
+        .vta-text-content * {
+            margin-bottom: 0.5rem; /* Standard margin for paragraphs, lists, etc. */
+            line-height: 1.5;
+        }
+        .vta-text-content ul, .vta-text-content ol {
+            margin-left: 1.5rem;
+            list-style-position: outside;
+        }
+        .vta-text-content h1, .vta-text-content h2, .vta-text-content h3 {
+            font-weight: bold;
+            margin-top: 1rem;
         }
     </style>
 </head>
@@ -592,51 +607,54 @@
                 console.error("Web Speech API (Text-to-Speech) not supported in this browser.");
             }
         }
-        
-        // ADDED: Function to add the speaker button after the message is complete
-        function addTtsButton(vtaElement) {
+
+        // NEW: Function to Render Markdown and add the TTS Button
+        /**
+         * Renders the full VTA message (Markdown -> HTML) and adds the TTS speaker button.
+         * @param {HTMLElement} vtaElement The root element of the message (the flex div).
+         * @param {string} rawMarkdown The raw text content received from the AI.
+         */
+        function renderVtaContent(vtaElement, rawMarkdown) {
             const messageBox = vtaElement.querySelector('.bg-blue-100, .dark\\:bg-blue-800');
-            const textP = messageBox.querySelector('p:not(.italic)'); // Get the main text paragraph
-            const emotionP = messageBox.querySelector('.italic'); // Get the optional emotion paragraph
+            const contentDiv = vtaElement.querySelector('.vta-text-content');
             
-            if (messageBox && textP) {
-                // Get the final text content
-                const finalContent = textP.textContent;
-                
-                // Create a container for the text and button to align them horizontally
-                const contentWrapper = document.createElement('div');
-                contentWrapper.className = 'flex items-start';
-                
-                // Create the button
-                const ttsButton = document.createElement('button');
-                ttsButton.className = 'tts-button flex-shrink-0';
-                ttsButton.innerHTML = '<i class="fas fa-volume-up"></i>';
-                ttsButton.title = 'Speak Response';
-                
-                // Attach click handler, passing the clean text
-                ttsButton.onclick = function() {
-                    speakText(finalContent.replace(/\n/g, ' '));
-                };
-                
-                // Reconstruct message box content to include the button
-                
-                // 1. Clear the message box
-                messageBox.innerHTML = ''; 
-                
-                // 2. Append the text paragraph and the button to the wrapper
-                contentWrapper.appendChild(textP);
-                contentWrapper.appendChild(ttsButton);
-                
-                // 3. Append the wrapper to the message box
-                messageBox.appendChild(contentWrapper);
-                
-                // 4. Re-append the emotion tag if it exists
-                if (emotionP) {
-                    messageBox.appendChild(emotionP);
-                }
-            }
+            if (!messageBox || !contentDiv) return;
+
+            // 1. Convert Markdown to HTML using Marked.js
+            // We use innerHTML here because the output of marked.parse is sanitized HTML
+            contentDiv.innerHTML = marked.parse(rawMarkdown);
+            
+            // 2. Wrap the HTML content and the TTS button for proper alignment
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex items-start justify-between'; 
+
+            // Create a div to contain the rendered text (H1, UL, P tags)
+            const textContainer = document.createElement('div');
+            textContainer.innerHTML = contentDiv.innerHTML;
+            textContainer.className = 'flex-grow'; // Allow it to take up space
+
+            // Get the clean text for speech (from the raw, unrendered version)
+            const speechText = rawMarkdown.replace(/[\*\#\n]/g, ' ').trim();
+
+            // Create the TTS button
+            const ttsButton = document.createElement('button');
+            ttsButton.className = 'tts-button flex-shrink-0';
+            ttsButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+            ttsButton.title = 'Speak Response';
+            ttsButton.onclick = function() {
+                speakText(speechText);
+            };
+
+            // Reconstruct the message box content
+            wrapper.appendChild(textContainer);
+            wrapper.appendChild(ttsButton);
+            
+            // Replace the raw content div's children with the new wrapper
+            contentDiv.innerHTML = '';
+            contentDiv.appendChild(wrapper);
         }
-        
+
+
         // Initialize animations and effects
         AOS.init({
             duration: 800,
@@ -1285,6 +1303,7 @@
         }
         // --- CHAT & SESSION MANAGEMENT ---
 
+        // UPDATED: createMessageElement for Markdown rendering
         function createMessageElement(sender, content, emotion = null) {
             const isVTA = sender === 'vta';
             const align = isVTA ? 'justify-start' : 'justify-end';
@@ -1293,12 +1312,26 @@
 
             const messageDiv = document.createElement('div');
             messageDiv.className = `flex ${align} mb-4`; 
-            messageDiv.innerHTML = `
+            
+            // NOTE: For VTA messages, we use a custom container to hold the rendered HTML and the TTS button
+            let contentHTML = `
                 <div class="${bgColor} p-3 rounded-xl max-w-lg text-sm shadow">
-                    <p class="${textColor}">${content}</p>
+                    <div class="${textColor} vta-text-content">${content}</div>
                     ${emotion ? `<p class="text-xs mt-1 italic text-gray-500 dark:text-gray-400">Emotion: ${emotion}</p>` : ''}
                 </div>
             `;
+
+            // Only for user messages, we don't need the complex inner structure, just plain text
+            if (!isVTA) {
+                contentHTML = `
+                    <div class="${bgColor} p-3 rounded-xl max-w-lg text-sm shadow">
+                        <p class="${textColor}">${content}</p>
+                        ${emotion ? `<p class="text-xs mt-1 italic text-gray-500 dark:text-gray-400">Emotion: ${emotion}</p>` : ''}
+                    </div>
+                `;
+            }
+            
+            messageDiv.innerHTML = contentHTML;
             return messageDiv;
         }
 
@@ -1307,6 +1340,7 @@
             chatArea.scrollTop = chatArea.scrollHeight;
         }
 
+        // UPDATED: loadSessionMessages to call renderVtaContent
         async function loadSessionMessages(sessionId) {
             const container = document.getElementById('messages-container');
             container.innerHTML = '';
@@ -1319,9 +1353,9 @@
                 data.messages.forEach(msg => {
                     const el = createMessageElement(msg.sender, msg.content, msg.emotion);
                     container.appendChild(el);
-                    // ADDED: Add button to loaded VTA messages
+                    // ADDED: Render Markdown and TTS button for VTA messages
                     if (msg.sender === 'vta') {
-                        addTtsButton(el);
+                        renderVtaContent(el, msg.content);
                     }
                 });
                 scrollToBottom();
@@ -1389,6 +1423,7 @@
             }
         }
 
+        // UPDATED: startNewSession to call renderVtaContent
         async function startNewSession() {
             // FIX: Corrected endpoint path to include /api
             const data = await fetch_data('/api/sessions/new', 'POST', {});
@@ -1398,7 +1433,8 @@
                 document.getElementById('messages-container').innerHTML = '';
                 const welcomeEl = createMessageElement('vta', data.welcome_message);
                 document.getElementById('messages-container').appendChild(welcomeEl);
-                addTtsButton(welcomeEl, data.welcome_message); // ADDED: Add button to welcome message
+                // ADDED: Render Markdown and TTS button for the welcome message
+                renderVtaContent(welcomeEl, data.welcome_message);
                 document.getElementById('current-session-title').textContent = data.title;
                 fetchRecentSessions(); // Refresh sidebar
                 scrollToBottom();
@@ -1407,6 +1443,7 @@
             }
         }
 
+        // UPDATED: sendMessage to stream raw text and then render Markdown/TTS button
         async function sendMessage(message) {
             if (!message.trim() || !currentConversationId) return;
 
@@ -1425,7 +1462,7 @@
             scrollToBottom();
 
 
-            // Call chat API (This path was fixed in the previous turn)
+            // Call chat API
             const data = await fetch_data('/api/chat', 'POST', {
                 message: message,
                 conversation_id: currentConversationId,
@@ -1440,23 +1477,25 @@
                 // Simulate text streaming effect for VTA response
                 const vtaMessage = data.vta_response;
                 
-                const vtaEl = createMessageElement('vta', '', 'VTA'); // Placeholder element
+                // Create a container element with the raw text temporarily
+                const vtaEl = createMessageElement('vta', vtaMessage, 'VTA'); 
                 document.getElementById('messages-container').appendChild(vtaEl);
                 
-                const messageBox = vtaEl.querySelector('.bg-blue-100, .dark\\:bg-blue-800');
-                const textP = messageBox.querySelector('p'); // Get the main text paragraph
-                
+                const contentDiv = vtaEl.querySelector('.vta-text-content');
+                // Temporarily store raw text for streaming effect
+                contentDiv.textContent = ''; 
+
                 let charIndex = 0;
                 const typingInterval = setInterval(() => {
                     if (charIndex < vtaMessage.length) {
-                        textP.textContent += vtaMessage.charAt(charIndex);
+                        contentDiv.textContent += vtaMessage.charAt(charIndex);
                         charIndex++;
                         scrollToBottom();
                     } else {
                         clearInterval(typingInterval);
                         
-                        // ADDED: Call the function to add the button after streaming is complete
-                        addTtsButton(vtaEl, vtaMessage); 
+                        // NEW: Finalize the message (render Markdown and add TTS)
+                        renderVtaContent(vtaEl, vtaMessage); 
                         scrollToBottom();
                     }
                 }, 15); // Typing speed in milliseconds
