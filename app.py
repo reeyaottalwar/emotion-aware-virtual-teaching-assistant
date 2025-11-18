@@ -43,21 +43,21 @@ def create_db():
         print("Database tables created!")
 
 # Configure Flask-Dance blueprints
-google_bp = make_google_blueprint(
-    client_id=os.environ.get("GOOGLE_OAUTH_CLIENT_ID"),
-    client_secret=os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET"),
-    scope=["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"]
-)
+# google_bp = make_google_blueprint(
+#     client_id=os.environ.get("GOOGLE_OAUTH_CLIENT_ID"),
+#     client_secret=os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET"),
+#     scope=["openid", "https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"]
+# )
 
-github_bp = make_github_blueprint(
-    client_id=os.environ.get("GITHUB_OAUTH_CLIENT_ID"),
-    client_secret=os.environ.get("GITHUB_OAUTH_CLIENT_SECRET"),
-    scope=["user:email"]
-)
+# github_bp = make_github_blueprint(
+#     client_id=os.environ.get("GITHUB_OAUTH_CLIENT_ID"),
+#     client_secret=os.environ.get("GITHUB_OAUTH_CLIENT_SECRET"),
+#     scope=["user:email"]
+# )
 
-# Register blueprints with the app
-app.register_blueprint(google_bp, url_prefix="/login")
-app.register_blueprint(github_bp, url_prefix="/login")
+# # Register blueprints with the app
+# app.register_blueprint(google_bp, url_prefix="/login")
+# app.register_blueprint(github_bp, url_prefix="/login")
 
 # --- Utility Functions ---
 
@@ -97,45 +97,45 @@ def index():
     # Frontend will check session via /check_session and render the correct view
     return render_template('index.html')
 
-# Unified handler for all social logins
-@app.route("/login/<provider>/authorized")
-def social_login_handler(provider):
-    # ... (Keep existing Flask-Dance logic) ...
-    if provider == 'google':
-        service = google
-    elif provider == 'github':
-        service = github
-    else:
-        return jsonify({"message": "Invalid provider"}), 400
+# # Unified handler for all social logins
+# @app.route("/login/<provider>/authorized")
+# def social_login_handler(provider):
+#     # ... (Keep existing Flask-Dance logic) ...
+#     if provider == 'google':
+#         service = google
+#     elif provider == 'github':
+#         service = github
+#     else:
+#         return jsonify({"message": "Invalid provider"}), 400
 
-    if not service.authorized:
-        return redirect(url_for(f"{provider}.login"))
+#     if not service.authorized:
+#         return redirect(url_for(f"{provider}.login"))
 
-    # user info from the provider's API
-    if provider == 'google':
-        resp = service.get("/oauth2/v2/userinfo")
-        email = resp.json()["email"]
-        name = resp.json().get("name")
-        username = email.split('@')[0]
-    elif provider == 'github':
-        resp = service.get("/user/emails")
-        email = resp.json()[0]["email"]
-        resp = service.get("/user")
-        username = resp.json()["login"]
-        name = resp.json().get("name", username)
+#     # user info from the provider's API
+#     if provider == 'google':
+#         resp = service.get("/oauth2/v2/userinfo")
+#         email = resp.json()["email"]
+#         name = resp.json().get("name")
+#         username = email.split('@')[0]
+#     elif provider == 'github':
+#         resp = service.get("/user/emails")
+#         email = resp.json()[0]["email"]
+#         resp = service.get("/user")
+#         username = resp.json()["login"]
+#         name = resp.json().get("name", username)
 
-    # Check for an existing user
-    user = User.query.filter_by(email=email).first()
+#     # Check for an existing user
+#     user = User.query.filter_by(email=email).first()
 
-    # create a new user if one does not exist
-    if not user:
-        # For social login, we generate a random password and set social_id
-        user = User(name=name, username=username, email=email, password=os.urandom(16).hex(), social_id=f"{provider}_{email}")
-        db.session.add(user)
-        db.session.commit()
+#     # create a new user if one does not exist
+#     if not user:
+#         # For social login, we generate a random password and set social_id
+#         user = User(name=name, username=username, email=email, password=os.urandom(16).hex(), social_id=f"{provider}_{email}")
+#         db.session.add(user)
+#         db.session.commit()
     
-    session['user_id'] = user.id
-    return render_template('redirect.html')
+#     session['user_id'] = user.id
+#     return render_template('redirect.html')
 
 # Checking if log-in was successful
 @app.route('/check_session')

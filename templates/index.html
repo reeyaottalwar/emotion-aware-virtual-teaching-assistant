@@ -10,6 +10,7 @@
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/feather-icons/dist/feather.min.js"></script>
     <script src="https://unpkg.com/feather-icons"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/vanta@latest/dist/vanta.globe.min.js"></script>
     <style>
@@ -86,6 +87,24 @@
                 transform: translateY(0);
                 opacity: 1;
             }
+        }
+        
+        /* ADDED: Styles for the TTS Button */
+        .tts-button {
+            background: none;
+            border: none;
+            color: #4CAF50; /* Green color for the speaker icon */
+            cursor: pointer;
+            font-size: 1em;
+            margin-left: 8px; /* Spacing between text and button */
+            padding: 0;
+            outline: none;
+            transition: color 0.2s;
+            line-height: 1; 
+        }
+
+        .tts-button:hover {
+            color: #388E3C;
         }
     </style>
 </head>
@@ -552,6 +571,72 @@
     </div>
 
     <script>
+        // ADDED: Text-to-Speech (TTS) Function
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); 
+                const utterance = new SpeechSynthesisUtterance(text);
+                
+                utterance.rate = 1.0; 
+                utterance.pitch = 1.0; 
+                
+                // Set voice if available
+                const voices = window.speechSynthesis.getVoices();
+                const preferredVoice = voices.find(v => v.lang.startsWith('en-') && v.default);
+                if (preferredVoice) {
+                    utterance.voice = preferredVoice;
+                }
+
+                window.speechSynthesis.speak(utterance);
+            } else {
+                console.error("Web Speech API (Text-to-Speech) not supported in this browser.");
+            }
+        }
+        
+        // ADDED: Function to add the speaker button after the message is complete
+        function addTtsButton(vtaElement) {
+            const messageBox = vtaElement.querySelector('.bg-blue-100, .dark\\:bg-blue-800');
+            const textP = messageBox.querySelector('p:not(.italic)'); // Get the main text paragraph
+            const emotionP = messageBox.querySelector('.italic'); // Get the optional emotion paragraph
+            
+            if (messageBox && textP) {
+                // Get the final text content
+                const finalContent = textP.textContent;
+                
+                // Create a container for the text and button to align them horizontally
+                const contentWrapper = document.createElement('div');
+                contentWrapper.className = 'flex items-start';
+                
+                // Create the button
+                const ttsButton = document.createElement('button');
+                ttsButton.className = 'tts-button flex-shrink-0';
+                ttsButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+                ttsButton.title = 'Speak Response';
+                
+                // Attach click handler, passing the clean text
+                ttsButton.onclick = function() {
+                    speakText(finalContent.replace(/\n/g, ' '));
+                };
+                
+                // Reconstruct message box content to include the button
+                
+                // 1. Clear the message box
+                messageBox.innerHTML = ''; 
+                
+                // 2. Append the text paragraph and the button to the wrapper
+                contentWrapper.appendChild(textP);
+                contentWrapper.appendChild(ttsButton);
+                
+                // 3. Append the wrapper to the message box
+                messageBox.appendChild(contentWrapper);
+                
+                // 4. Re-append the emotion tag if it exists
+                if (emotionP) {
+                    messageBox.appendChild(emotionP);
+                }
+            }
+        }
+        
         // Initialize animations and effects
         AOS.init({
             duration: 800,
@@ -1234,6 +1319,10 @@
                 data.messages.forEach(msg => {
                     const el = createMessageElement(msg.sender, msg.content, msg.emotion);
                     container.appendChild(el);
+                    // ADDED: Add button to loaded VTA messages
+                    if (msg.sender === 'vta') {
+                        addTtsButton(el);
+                    }
                 });
                 scrollToBottom();
             } else {
@@ -1309,6 +1398,7 @@
                 document.getElementById('messages-container').innerHTML = '';
                 const welcomeEl = createMessageElement('vta', data.welcome_message);
                 document.getElementById('messages-container').appendChild(welcomeEl);
+                addTtsButton(welcomeEl, data.welcome_message); // ADDED: Add button to welcome message
                 document.getElementById('current-session-title').textContent = data.title;
                 fetchRecentSessions(); // Refresh sidebar
                 scrollToBottom();
@@ -1349,20 +1439,24 @@
             if (data.success) {
                 // Simulate text streaming effect for VTA response
                 const vtaMessage = data.vta_response;
-                // ... (rest of the streaming logic remains the same)
-                // ... (use the original streaming logic provided earlier)
+                
                 const vtaEl = createMessageElement('vta', '', 'VTA'); // Placeholder element
                 document.getElementById('messages-container').appendChild(vtaEl);
-
+                
+                const messageBox = vtaEl.querySelector('.bg-blue-100, .dark\\:bg-blue-800');
+                const textP = messageBox.querySelector('p'); // Get the main text paragraph
+                
                 let charIndex = 0;
                 const typingInterval = setInterval(() => {
                     if (charIndex < vtaMessage.length) {
-                        vtaEl.querySelector('p').textContent += vtaMessage.charAt(charIndex);
+                        textP.textContent += vtaMessage.charAt(charIndex);
                         charIndex++;
                         scrollToBottom();
                     } else {
                         clearInterval(typingInterval);
-                        vtaEl.innerHTML = createMessageElement('vta', vtaMessage).innerHTML; // Final clean state
+                        
+                        // ADDED: Call the function to add the button after streaming is complete
+                        addTtsButton(vtaEl, vtaMessage); 
                         scrollToBottom();
                     }
                 }, 15); // Typing speed in milliseconds
