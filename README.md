@@ -82,9 +82,9 @@ python app.py
 
 ### **Project Team**
 
-  * Animesh Naroliya
-  * Kriti Upadhyay
-  * Lithiga Jayaprakash
-  * Reeya Ottalwar 
+  * Animesh Naroliya @Animesh-Naroliya
+  * Kriti Upadhyay @kritiupadhyay2401
+  * Lithiga Jayaprakash @Lithigaj
+  * Reeya Ottalwar @reeyaottalwar
   
 ### **Thank You**
