@@ -12,7 +12,7 @@ from datetime import datetime
 # --- EXTERNAL MODULE IMPORTS ---
 from groqChatbot import llm_chatbot 
 from VoiceAnalysis.speechAnalyzer import analyze_audio_blob 
-from VideoAnalysis.VideoAnalyzer import analyze_video_frame
+from video_analysis.video_analysis import analyze_video_frame
 # ---
 
 # Set this environment variable for local testing with HTTP
