@@ -2,8 +2,6 @@ import time
 import os
 from flask import Flask, jsonify, request, session, redirect, url_for, render_template, g 
 from flask_socketio import SocketIO, emit
-from flask_dance.contrib.google import make_google_blueprint, google
-from flask_dance.contrib.github import make_github_blueprint, github
 from dotenv import load_dotenv
 from database import db, User, Conversation, Message
 from werkzeug.security import check_password_hash
@@ -11,7 +9,7 @@ from datetime import datetime
 
 # --- EXTERNAL MODULE IMPORTS ---
 from groqChatbot import llm_chatbot 
-from VoiceAnalysis.speechAnalyzer import analyze_audio_blob 
+from voice_analysis.voice_analysis import analyze_audio_blob 
 from video_analysis.video_analysis import analyze_video_frame
 # ---
 
